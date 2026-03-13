@@ -3,6 +3,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import {
+  AcceptLanguageResolver,
+  I18nModule,
+  QueryResolver,
+  HeaderResolver,
+} from 'nestjs-i18n';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -17,8 +24,21 @@ import { ConfigModule } from '@nestjs/config';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       entities: [],
-      synchronize: true,
-    })],
+      synchronize: false,
+    }),
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      loaderOptions: {
+        path: join(__dirname, '/i18n/'),
+        watch: true,
+      },
+      resolvers: [
+        { use: QueryResolver, options: ['lang'] },
+        AcceptLanguageResolver,
+        new HeaderResolver(['x-lang']),
+      ],
+    }),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
