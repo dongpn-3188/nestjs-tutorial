@@ -10,6 +10,7 @@ import {
   HeaderResolver,
 } from 'nestjs-i18n';
 import { join } from 'path';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { join } from 'path';
         new HeaderResolver(['x-lang']),
       ],
     }),
+    CommonModule
   ],
   controllers: [AppController],
   providers: [AppService],

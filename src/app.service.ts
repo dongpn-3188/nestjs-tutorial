@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { I18nContext, I18nService } from 'nestjs-i18n';
+import { SharedService } from './common/shared.service';
 
 @Injectable()
 export class AppService {
-  constructor(private readonly i18n: I18nService) {}
+  constructor(private readonly sharedService: SharedService) {}
   getHello(): string {
-    const lang = I18nContext.current()?.lang ?? 'en';
-    return this.i18n.t('example.HELLO', { lang });
+    return this.sharedService.getSharedMessage('example.HELLO');
   }
 }
