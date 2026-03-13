@@ -11,6 +11,8 @@ import {
 } from 'nestjs-i18n';
 import { join } from 'path';
 import { CommonModule } from './common/common.module';
+import { UsersModule } from './modules/users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -24,7 +26,8 @@ import { CommonModule } from './common/common.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [],
+      autoLoadEntities: true,
+      migrations: [__dirname + '/migrations/*{.ts,.js}'],
       synchronize: false,
     }),
     I18nModule.forRoot({
@@ -39,7 +42,9 @@ import { CommonModule } from './common/common.module';
         new HeaderResolver(['x-lang']),
       ],
     }),
-    CommonModule
+    CommonModule,
+    UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
