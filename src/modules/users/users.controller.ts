@@ -28,7 +28,7 @@ export class UsersController {
   }
 
   @Put()
-  async update(@Body() updateUserDto: UpdateUserDto,@Req() req) {
+  async updateUserById(@Body() updateUserDto: UpdateUserDto,@Req() req) {
     return this.usersService.update(req.user.userId, updateUserDto);
   }
 }
