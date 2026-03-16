@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { AuthService } from './auth.service';
@@ -54,7 +54,7 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    it('should throw UnauthorizedException when email already exists', async () => {
+    it('should throw BadRequestException when email already exists', async () => {
       mockAuthRepository.existsByEmail.mockResolvedValue(true);
       mockSharedService.getSharedMessage.mockReturnValue('Email already exists');
 
@@ -64,13 +64,35 @@ describe('AuthService', () => {
           email: 'john@example.com',
           password: '123456',
         }),
-      ).rejects.toThrow(UnauthorizedException);
+      ).rejects.toThrow(BadRequestException);
 
       expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith(
         'message.EMAIL_ALREADY_EXISTS',
       );
       expect(mockAuthRepository.createUser).not.toHaveBeenCalled();
       expect(mockJwtService.signAsync).not.toHaveBeenCalled();
+    });
+
+    it('should return error response when create user fails', async () => {
+      mockAuthRepository.existsByEmail.mockResolvedValue(false);
+      mockBcrypt.hash.mockResolvedValue('hashed-password' as never);
+      mockAuthRepository.createUser.mockRejectedValue(new Error('db error'));
+      mockSharedService.getSharedMessage.mockReturnValue('Registration failed');
+
+      const result = await service.register({
+        username: 'john',
+        email: 'john@example.com',
+        password: '123456',
+      });
+
+      expect(result).toEqual({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        errors: 'Internal Server Error',
+        message: 'Registration failed',
+      });
+      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith(
+        'message.REGISTRATION_FAILED',
+      );
     });
 
     it('should create user and return access token', async () => {
@@ -106,7 +128,7 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('should throw UnauthorizedException when user is not found', async () => {
+    it('should throw BadRequestException when user is not found', async () => {
       mockAuthRepository.findByEmail.mockResolvedValue(null);
       mockSharedService.getSharedMessage.mockReturnValue(
         'Invalid email or password',
@@ -114,7 +136,7 @@ describe('AuthService', () => {
 
       await expect(
         service.login({ email: 'john@example.com', password: '123456' }),
-      ).rejects.toThrow(UnauthorizedException);
+      ).rejects.toThrow(BadRequestException);
 
       expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith(
         'message.INVALID_EMAIL_OR_PASSWORD',
@@ -122,7 +144,7 @@ describe('AuthService', () => {
       expect(mockJwtService.signAsync).not.toHaveBeenCalled();
     });
 
-    it('should throw UnauthorizedException when password is invalid', async () => {
+    it('should throw BadRequestException when password is invalid', async () => {
       mockAuthRepository.findByEmail.mockResolvedValue({
         id: 1,
         email: 'john@example.com',
@@ -135,7 +157,7 @@ describe('AuthService', () => {
 
       await expect(
         service.login({ email: 'john@example.com', password: 'wrong-password' }),
-      ).rejects.toThrow(UnauthorizedException);
+      ).rejects.toThrow(BadRequestException);
 
       expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith(
         'message.INVALID_EMAIL_OR_PASSWORD',

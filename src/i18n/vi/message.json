@@ -3,5 +3,6 @@
   "EMAIL_ALREADY_EXISTS": "Email da ton tai",
   "INVALID_EMAIL_OR_PASSWORD": "Email hoac mat khau khong dung",
   "USER_NOT_FOUND": "Khong tim thay user",
-  "USER_UPDATE_FAILED": "Cap nhat user that bai"
+  "USER_UPDATE_FAILED": "Cap nhat user that bai",
+  "REGISTRATION_FAILED": "Dang ky that bai"
 }

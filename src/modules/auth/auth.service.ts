@@ -1,6 +1,7 @@
 import {
+  BadRequestException,
+  HttpStatus,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
@@ -23,7 +24,7 @@ export class AuthService {
     const emailInUse = await this.authRepository.existsByEmail(registerDto.email);
 
     if (emailInUse) {
-      throw new UnauthorizedException(
+      throw new BadRequestException(
         this.sharedService.getSharedMessage('message.EMAIL_ALREADY_EXISTS'),
       );
     }
@@ -33,19 +34,27 @@ export class AuthService {
       this.saltRounds,
     );
 
-    const savedUser = await this.authRepository.createUser(registerDto, hashedPassword);
-    const payload = { sub: savedUser.id, email: savedUser.email };
+    try {
+      const savedUser = await this.authRepository.createUser(registerDto, hashedPassword);
+      const payload = { sub: savedUser.id, email: savedUser.email };
 
-    return {
-      accessToken: await this.jwtService.signAsync(payload, { expiresIn: '1h' })
-    };
+      return {
+        accessToken: await this.jwtService.signAsync(payload, { expiresIn: '1h' }),
+      };
+    } catch {
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        errors: 'Internal Server Error',
+        message: this.sharedService.getSharedMessage('message.REGISTRATION_FAILED'),
+      };
+    }
   }
 
   async login(loginDto: LoginDto) {
     const user = await this.authRepository.findByEmail(loginDto.email);
 
     if (!user) {
-      throw new UnauthorizedException(
+      throw new BadRequestException(
         this.sharedService.getSharedMessage('message.INVALID_EMAIL_OR_PASSWORD'),
       );
     }
@@ -56,7 +65,7 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException(
+      throw new BadRequestException(
         this.sharedService.getSharedMessage('message.INVALID_EMAIL_OR_PASSWORD'),
       );
     }

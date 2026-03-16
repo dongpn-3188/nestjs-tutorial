@@ -1,14 +1,14 @@
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from '../../database/Entities/user.entity';
+import { User } from '../../database/entities/user.entity';
 import { UsersRepository } from './users.repository';
 import { SharedService } from '../../common/shared.service';
 import * as bcrypt from 'bcryptjs';
+import { UserSerializer } from './serializers/user.serializer';
 
 @Injectable()
 export class UsersService {
@@ -17,11 +17,7 @@ export class UsersService {
     private readonly sharedService: SharedService,
   ) {}
 
-  findAll(): Promise<User[]> {
-    return this.usersRepository.findAll();
-  }
-
-  async findOne(id: number): Promise<User> {
+  async loadUserOrThrow(id: number): Promise<User> {
     const user = await this.usersRepository.findById(id);
     if (!user) {
       throw new NotFoundException(
@@ -31,39 +27,42 @@ export class UsersService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    const userExist = await this.usersRepository.findById(id);
-    if (!userExist) {
-      throw new NotFoundException(
-        this.sharedService.getSharedMessage('message.USER_NOT_FOUND'),
-      );
-    }
+  async checkEmailExists(email: string): Promise<boolean> {
+    const user = await this.usersRepository.findByEmail(email);
+    return !!user;
+  }
 
-    if(updateUserDto.email) {
-      const emailExist = await this.usersRepository.findByEmail(updateUserDto.email);
-      if(emailExist && emailExist.id !== id) {
+  async findOne(id: number) {
+    const user = await this.loadUserOrThrow(id);
+    return new UserSerializer(user, { type: 'BASIC_INFO' }).serialize();
+  }
+
+  async update(id: number, data: Partial<User>) {
+    const userExist = await this.loadUserOrThrow(id);
+
+    if (data.email && data.email !== userExist.email) {
+      const emailExist = await this.checkEmailExists(data.email);
+      if (emailExist && data.email !== userExist.email) {
         throw new BadRequestException(
-          this.sharedService.getSharedMessage('message.EMAIL_ALREADY_EXISTS', {
-            args: { email: updateUserDto.email },
-          }),
+          this.sharedService.getSharedMessage('message.EMAIL_ALREADY_EXISTS'),
         );
       }
     }
 
-    if(updateUserDto.password) {    
-      const hashedPassword = await bcrypt.hash(
-        updateUserDto.password,
-        10,
-      );
-      updateUserDto.password = hashedPassword;
+    if (data.password) {
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      data.password = hashedPassword;
     }
 
-    const updatedUser = await this.usersRepository.updateById(id, updateUserDto);
-    if (!updatedUser) {
-      throw new InternalServerErrorException(
-        this.sharedService.getSharedMessage('message.USER_UPDATE_FAILED'),
-      );
+    try {
+      const updatedUser = await this.usersRepository.updateById(id, data);
+      return new UserSerializer(updatedUser, { type: 'BASIC_INFO' }).serialize();
+    } catch {
+      return {
+        statusCode: HttpStatus.NOT_FOUND,
+        errors: 'Not Found',
+        message: this.sharedService.getSharedMessage('message.USER_NOT_FOUND'),
+      };
     }
-    return updatedUser;
   }
 }

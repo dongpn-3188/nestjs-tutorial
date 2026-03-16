@@ -52,7 +52,7 @@ async function bootstrap() {
 
         return {
           statusCode: HttpStatus.BAD_REQUEST,
-          errors: "Bad Request",
+          errors: 'Bad Request',
           message: firstErrorMessage ?? 'Validation failed',
         };
       },

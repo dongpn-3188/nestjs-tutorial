@@ -1,9 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  BadRequestException,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersRepository } from './users.repository';
 import { SharedService } from '../../common/shared.service';
@@ -47,21 +43,6 @@ describe('UsersService', () => {
     service = module.get<UsersService>(UsersService);
   });
 
-  describe('findAll', () => {
-    it('should return all users', async () => {
-      const users = [
-        { id: 1, username: 'john', email: 'john@example.com' },
-        { id: 2, username: 'jane', email: 'jane@example.com' },
-      ];
-      mockUsersRepository.findAll.mockResolvedValue(users);
-
-      const result = await service.findAll();
-
-      expect(mockUsersRepository.findAll).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(users);
-    });
-  });
-
   describe('findOne', () => {
     it('should return user when user exists', async () => {
       const user = { id: 1, username: 'john', email: 'john@example.com' };
@@ -91,6 +72,9 @@ describe('UsersService', () => {
         id: 1,
         username: 'john-new',
         email: 'john@example.com',
+        avatar: null,
+        bio: null,
+        password: 'secret',
       };
       mockUsersRepository.findById.mockResolvedValue(existingUser);
       mockUsersRepository.updateById.mockResolvedValue(updatedUser);
@@ -99,7 +83,13 @@ describe('UsersService', () => {
 
       expect(mockUsersRepository.findById).toHaveBeenCalledWith(1);
       expect(mockUsersRepository.updateById).toHaveBeenCalledWith(1, updateDto);
-      expect(result).toEqual(updatedUser);
+      expect(result).toEqual({
+        id: 1,
+        username: 'john-new',
+        email: 'john@example.com',
+        avatar: null,
+        bio: null,
+      });
     });
 
     it('should throw NotFoundException when user does not exist', async () => {
@@ -131,25 +121,26 @@ describe('UsersService', () => {
       );
       expect(mockUsersRepository.findByEmail).toHaveBeenCalledWith('jane@example.com');
       expect(mockUsersRepository.updateById).not.toHaveBeenCalled();
-      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith(
-        'message.EMAIL_ALREADY_EXISTS',
-        { args: { email: 'jane@example.com' } },
-      );
+      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith('message.EMAIL_ALREADY_EXISTS');
     });
 
-    it('should throw InternalServerErrorException when update fails unexpectedly', async () => {
+    it('should return error response when update fails unexpectedly', async () => {
       mockUsersRepository.findById.mockResolvedValue({
         id: 1,
         username: 'john',
         email: 'john@example.com',
       });
-      mockUsersRepository.updateById.mockResolvedValue(null);
-      mockSharedService.getSharedMessage.mockReturnValue('Failed to update user');
+      mockUsersRepository.updateById.mockRejectedValue(new Error('db error'));
+      mockSharedService.getSharedMessage.mockReturnValue('User not found');
 
-      await expect(service.update(1, { username: 'john-new' })).rejects.toThrow(
-        InternalServerErrorException,
-      );
-      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith('message.USER_UPDATE_FAILED');
+      const result = await service.update(1, { username: 'john-new' });
+
+      expect(result).toEqual({
+        statusCode: HttpStatus.NOT_FOUND,
+        errors: 'Not Found',
+        message: 'User not found',
+      });
+      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith('message.USER_NOT_FOUND');
     });
 
     it('should hash password before update', async () => {
@@ -160,6 +151,8 @@ describe('UsersService', () => {
         id: 1,
         username: 'john',
         email: 'john@example.com',
+        avatar: null,
+        bio: null,
         password: 'hashed-password',
       };
 
@@ -176,7 +169,13 @@ describe('UsersService', () => {
       expect(mockUsersRepository.updateById).toHaveBeenCalledWith(1, {
         password: 'hashed-password',
       });
-      expect(result).toEqual(updatedUser);
+      expect(result).toEqual({
+        id: 1,
+        username: 'john',
+        email: 'john@example.com',
+        avatar: null,
+        bio: null,
+      });
     });
   });
 });

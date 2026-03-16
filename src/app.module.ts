@@ -27,7 +27,7 @@ import { AuthModule } from './modules/auth/auth.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       autoLoadEntities: true,
-      migrations: [__dirname + '/migrations/*{.ts,.js}'],
+      migrations: [join(__dirname, 'database/migrations/*{.ts,.js}')],
       synchronize: false,
     }),
     I18nModule.forRoot({
