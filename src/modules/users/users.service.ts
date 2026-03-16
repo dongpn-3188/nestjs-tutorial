@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { User } from '../../database/entities/user.entity';
+import { User } from '../../database/Entities/user.entity';
 import { UsersRepository } from './users.repository';
 import { SharedService } from '../../common/shared.service';
 import * as bcrypt from 'bcryptjs';

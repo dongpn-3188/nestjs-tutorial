@@ -10,7 +10,7 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'nest_db',
-  entities: ['src/database/entities/*.entity.{ts,js}'],
+  entities: ['src/database/Entities/*.entity.{ts,js}'],
   migrations: ['src/database/migrations/*.{ts,js}'],
   synchronize: false,
 });
