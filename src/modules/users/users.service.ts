@@ -2,10 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '../../database/Entities/user.entity';
 import { UsersRepository } from './users.repository';
+import { SharedService } from '../../common/shared.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(
+    private readonly usersRepository: UsersRepository,
+    private readonly sharedService: SharedService,
+  ) {}
 
   findAll(): Promise<User[]> {
     return this.usersRepository.findAll();
@@ -14,7 +18,11 @@ export class UsersService {
   async findOne(id: number): Promise<User> {
     const user = await this.usersRepository.findById(id);
     if (!user) {
-      throw new NotFoundException(`User #${id} not found`);
+      throw new NotFoundException(
+        this.sharedService.getSharedMessage('message.USER_NOT_FOUND', {
+          args: { id },
+        }),
+      );
     }
     return user;
   }
@@ -22,7 +30,11 @@ export class UsersService {
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.usersRepository.updateById(id, updateUserDto);
     if (!user) {
-      throw new NotFoundException(`User #${id} not found`);
+      throw new NotFoundException(
+        this.sharedService.getSharedMessage('message.USER_NOT_FOUND', {
+          args: { id },
+        }),
+      );
     }
     return user;
   }

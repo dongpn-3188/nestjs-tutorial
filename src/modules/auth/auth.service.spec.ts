@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { AuthService } from './auth.service';
 import { AuthRepository } from './auth.repository';
+import { SharedService } from '../../common/shared.service';
 
 jest.mock('bcryptjs', () => ({
   hash: jest.fn(),
@@ -24,6 +25,10 @@ describe('AuthService', () => {
     signAsync: jest.fn(),
   };
 
+  const mockSharedService = {
+    getSharedMessage: jest.fn(),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -38,6 +43,10 @@ describe('AuthService', () => {
           provide: JwtService,
           useValue: mockJwtService,
         },
+        {
+          provide: SharedService,
+          useValue: mockSharedService,
+        },
       ],
     }).compile();
 
@@ -47,6 +56,7 @@ describe('AuthService', () => {
   describe('register', () => {
     it('should throw UnauthorizedException when email already exists', async () => {
       mockAuthRepository.existsByEmail.mockResolvedValue(true);
+      mockSharedService.getSharedMessage.mockReturnValue('Email already exists');
 
       await expect(
         service.register({
@@ -56,6 +66,9 @@ describe('AuthService', () => {
         }),
       ).rejects.toThrow(UnauthorizedException);
 
+      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith(
+        'message.EMAIL_ALREADY_EXISTS',
+      );
       expect(mockAuthRepository.createUser).not.toHaveBeenCalled();
       expect(mockJwtService.signAsync).not.toHaveBeenCalled();
     });
@@ -95,11 +108,17 @@ describe('AuthService', () => {
   describe('login', () => {
     it('should throw UnauthorizedException when user is not found', async () => {
       mockAuthRepository.findByEmail.mockResolvedValue(null);
+      mockSharedService.getSharedMessage.mockReturnValue(
+        'Invalid email or password',
+      );
 
       await expect(
         service.login({ email: 'john@example.com', password: '123456' }),
       ).rejects.toThrow(UnauthorizedException);
 
+      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith(
+        'message.INVALID_EMAIL_OR_PASSWORD',
+      );
       expect(mockJwtService.signAsync).not.toHaveBeenCalled();
     });
 
@@ -110,11 +129,17 @@ describe('AuthService', () => {
         password: 'hashed-password',
       });
       mockBcrypt.compare.mockResolvedValue(false as never);
+      mockSharedService.getSharedMessage.mockReturnValue(
+        'Invalid email or password',
+      );
 
       await expect(
         service.login({ email: 'john@example.com', password: 'wrong-password' }),
       ).rejects.toThrow(UnauthorizedException);
 
+      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith(
+        'message.INVALID_EMAIL_OR_PASSWORD',
+      );
       expect(mockJwtService.signAsync).not.toHaveBeenCalled();
     });
 

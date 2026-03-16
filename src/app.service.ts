@@ -5,6 +5,6 @@ import { SharedService } from './common/shared.service';
 export class AppService {
   constructor(private readonly sharedService: SharedService) {}
   getHello(): string {
-    return this.sharedService.getSharedMessage('example.HELLO');
+    return this.sharedService.getSharedMessage('message.HELLO');
   }
 }

@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersRepository } from './users.repository';
+import { SharedService } from '../../common/shared.service';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -10,6 +11,10 @@ describe('UsersService', () => {
     findAll: jest.fn(),
     findById: jest.fn(),
     updateById: jest.fn(),
+  };
+
+  const mockSharedService = {
+    getSharedMessage: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -21,6 +26,10 @@ describe('UsersService', () => {
         {
           provide: UsersRepository,
           useValue: mockUsersRepository,
+        },
+        {
+          provide: SharedService,
+          useValue: mockSharedService,
         },
       ],
     }).compile();
@@ -56,8 +65,13 @@ describe('UsersService', () => {
 
     it('should throw NotFoundException when user does not exist', async () => {
       mockUsersRepository.findById.mockResolvedValue(null);
+      mockSharedService.getSharedMessage.mockReturnValue('User #1 not found');
 
       await expect(service.findOne(1)).rejects.toThrow(NotFoundException);
+      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith(
+        'message.USER_NOT_FOUND',
+        { args: { id: 1 } },
+      );
     });
   });
 
@@ -79,9 +93,14 @@ describe('UsersService', () => {
 
     it('should throw NotFoundException when user does not exist', async () => {
       mockUsersRepository.updateById.mockResolvedValue(null);
+      mockSharedService.getSharedMessage.mockReturnValue('User #1 not found');
 
       await expect(service.update(1, { username: 'john-new' })).rejects.toThrow(
         NotFoundException,
+      );
+      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith(
+        'message.USER_NOT_FOUND',
+        { args: { id: 1 } },
       );
     });
   });
