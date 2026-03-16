@@ -7,6 +7,8 @@ import {
   I18nValidationPipe,
   I18nValidationError
 } from 'nestjs-i18n';
+import { ClassSerializerInterceptor } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 
 const API_PREFIX = 'api';
 const SWAGGER_DOCS_PATH = `${API_PREFIX}/swagger`;
@@ -56,6 +58,7 @@ async function bootstrap() {
       },
     }),
   );
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

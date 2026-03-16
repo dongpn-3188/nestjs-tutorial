@@ -2,5 +2,6 @@
   "HELLO": "Hello World!",
   "EMAIL_ALREADY_EXISTS": "Email already exists",
   "INVALID_EMAIL_OR_PASSWORD": "Invalid email or password",
-  "USER_NOT_FOUND": "User #{{id}} not found"
+  "USER_NOT_FOUND": "User not found",
+  "USER_UPDATE_FAILED": "Failed to update user"
 }
