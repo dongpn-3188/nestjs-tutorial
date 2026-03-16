@@ -16,7 +16,7 @@ describe('UsersService', () => {
     findAll: jest.fn(),
     findById: jest.fn(),
     findByEmail: jest.fn(),
-    updateById: jest.fn(),
+    updateUser: jest.fn(),
   };
 
   const mockSharedService = {
@@ -77,12 +77,12 @@ describe('UsersService', () => {
         password: 'secret',
       };
       mockUsersRepository.findById.mockResolvedValue(existingUser);
-      mockUsersRepository.updateById.mockResolvedValue(updatedUser);
+      mockUsersRepository.updateUser.mockResolvedValue(updatedUser);
 
       const result = await service.update(1, updateDto);
 
       expect(mockUsersRepository.findById).toHaveBeenCalledWith(1);
-      expect(mockUsersRepository.updateById).toHaveBeenCalledWith(1, updateDto);
+      expect(mockUsersRepository.updateUser).toHaveBeenCalledWith(existingUser, updateDto);
       expect(result).toEqual({
         id: 1,
         username: 'john-new',
@@ -99,7 +99,7 @@ describe('UsersService', () => {
       await expect(service.update(1, { username: 'john-new' })).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockUsersRepository.updateById).not.toHaveBeenCalled();
+      expect(mockUsersRepository.updateUser).not.toHaveBeenCalled();
       expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith('message.USER_NOT_FOUND');
     });
 
@@ -120,7 +120,7 @@ describe('UsersService', () => {
         BadRequestException,
       );
       expect(mockUsersRepository.findByEmail).toHaveBeenCalledWith('jane@example.com');
-      expect(mockUsersRepository.updateById).not.toHaveBeenCalled();
+      expect(mockUsersRepository.updateUser).not.toHaveBeenCalled();
       expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith('message.EMAIL_ALREADY_EXISTS');
     });
 
@@ -130,17 +130,17 @@ describe('UsersService', () => {
         username: 'john',
         email: 'john@example.com',
       });
-      mockUsersRepository.updateById.mockRejectedValue(new Error('db error'));
-      mockSharedService.getSharedMessage.mockReturnValue('User not found');
+      mockUsersRepository.updateUser.mockRejectedValue(new Error('db error'));
+      mockSharedService.getSharedMessage.mockReturnValue('Failed to update user');
 
       const result = await service.update(1, { username: 'john-new' });
 
       expect(result).toEqual({
-        statusCode: HttpStatus.NOT_FOUND,
-        errors: 'Not Found',
-        message: 'User not found',
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        errors: 'Internal Server Error',
+        message: 'Failed to update user',
       });
-      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith('message.USER_NOT_FOUND');
+      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith('message.USER_UPDATE_FAILED');
     });
 
     it('should hash password before update', async () => {
@@ -161,12 +161,16 @@ describe('UsersService', () => {
         username: 'john',
         email: 'john@example.com',
       });
-      mockUsersRepository.updateById.mockResolvedValue(updatedUser);
+      mockUsersRepository.updateUser.mockResolvedValue(updatedUser);
 
       const result = await service.update(1, updateDto);
 
       expect(mockBcryptHash).toHaveBeenCalledWith('plain-password', 10);
-      expect(mockUsersRepository.updateById).toHaveBeenCalledWith(1, {
+      expect(mockUsersRepository.updateUser).toHaveBeenCalledWith(expect.objectContaining({
+        id: 1,
+        username: 'john',
+        email: 'john@example.com',
+      }), {
         password: 'hashed-password',
       });
       expect(result).toEqual({

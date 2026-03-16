@@ -9,6 +9,7 @@ import { UsersRepository } from './users.repository';
 import { SharedService } from '../../common/shared.service';
 import * as bcrypt from 'bcryptjs';
 import { UserSerializer } from './serializers/user.serializer';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -37,7 +38,7 @@ export class UsersService {
     return new UserSerializer(user, { type: 'BASIC_INFO' }).serialize();
   }
 
-  async update(id: number, data: Partial<User>) {
+  async update(id: number, data: UpdateUserDto) {
     const userExist = await this.loadUserOrThrow(id);
 
     if (data.email && data.email !== userExist.email) {
@@ -55,13 +56,13 @@ export class UsersService {
     }
 
     try {
-      const updatedUser = await this.usersRepository.updateById(id, data);
+      const updatedUser = await this.usersRepository.updateUser(userExist, data);
       return new UserSerializer(updatedUser, { type: 'BASIC_INFO' }).serialize();
     } catch {
       return {
-        statusCode: HttpStatus.NOT_FOUND,
-        errors: 'Not Found',
-        message: this.sharedService.getSharedMessage('message.USER_NOT_FOUND'),
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        errors: 'Internal Server Error',
+        message: this.sharedService.getSharedMessage('message.USER_UPDATE_FAILED'),
       };
     }
   }

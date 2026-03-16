@@ -34,7 +34,7 @@ export class UsersController {
 
   @Put()
   @ApiOperation({ summary: 'Update current user profile' })
-  async updateUserById(@Body() updateUserDto: UpdateUserDto,@Req() req) {
+  async updateUserById(@Body() updateUserDto: UpdateUserDto, @Req() req) {
     return this.usersService.update(req.user.userId, updateUserDto);
   }
 }

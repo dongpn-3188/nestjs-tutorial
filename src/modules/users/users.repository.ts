@@ -25,14 +25,7 @@ export class UsersRepository {
     return this.userRepository.save(user);
   }
 
-  async updateById(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findById(id);
-    if (!user) {
-      throw new NotFoundException(
-        this.sharedService.getSharedMessage('message.USER_NOT_FOUND'),
-      );
-    }
-
+  async updateUser(user: User, updateUserDto: UpdateUserDto): Promise<User> {
     Object.assign(user, updateUserDto);
     return this.save(user);
   }
