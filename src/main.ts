@@ -1,16 +1,29 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { HttpStatus } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import {
   I18nValidationExceptionFilter,
   I18nValidationPipe,
   I18nValidationError
 } from 'nestjs-i18n';
 
+const API_PREFIX = 'api';
+const SWAGGER_DOCS_PATH = `${API_PREFIX}/swagger`;
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix(API_PREFIX);
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('NestJS Tutorial API')
+    .setDescription('API documentation for NestJS Tutorial project')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup(SWAGGER_DOCS_PATH, app, swaggerDocument);
 
   app.useGlobalPipes(
     new I18nValidationPipe({
