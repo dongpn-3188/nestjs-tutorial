@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import {
   I18nValidationExceptionFilter,
   I18nValidationPipe,
-  I18nValidationError
+  I18nValidationError,
 } from 'nestjs-i18n';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';

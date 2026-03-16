@@ -2,6 +2,7 @@ import {
   BadRequestException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
@@ -42,11 +43,11 @@ export class AuthService {
         accessToken: await this.jwtService.signAsync(payload, { expiresIn: '1h' }),
       };
     } catch {
-      return {
+      throw new InternalServerErrorException({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         errors: 'Internal Server Error',
         message: this.sharedService.getSharedMessage('message.REGISTRATION_FAILED'),
-      };
+      });
     }
   }
 

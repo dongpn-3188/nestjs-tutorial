@@ -2,6 +2,7 @@ import {
   BadRequestException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { User } from '../../database/entities/user.entity';
@@ -59,11 +60,11 @@ export class UsersService {
       const updatedUser = await this.usersRepository.updateUser(userExist, data);
       return new UserSerializer(updatedUser, { type: 'BASIC_INFO' }).serialize();
     } catch {
-      return {
+      throw new InternalServerErrorException({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         errors: 'Internal Server Error',
         message: this.sharedService.getSharedMessage('message.USER_UPDATE_FAILED'),
-      };
+      });
     }
   }
 }
