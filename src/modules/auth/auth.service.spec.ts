@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, HttpStatus } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { AuthService } from './auth.service';
@@ -73,23 +77,19 @@ describe('AuthService', () => {
       expect(mockJwtService.signAsync).not.toHaveBeenCalled();
     });
 
-    it('should return error response when create user fails', async () => {
+    it('should throw InternalServerErrorException when create user fails', async () => {
       mockAuthRepository.existsByEmail.mockResolvedValue(false);
       mockBcrypt.hash.mockResolvedValue('hashed-password' as never);
       mockAuthRepository.createUser.mockRejectedValue(new Error('db error'));
       mockSharedService.getSharedMessage.mockReturnValue('Registration failed');
 
-      const result = await service.register({
-        username: 'john',
-        email: 'john@example.com',
-        password: '123456',
-      });
-
-      expect(result).toEqual({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        errors: 'Internal Server Error',
-        message: 'Registration failed',
-      });
+      await expect(
+        service.register({
+          username: 'john',
+          email: 'john@example.com',
+          password: '123456',
+        }),
+      ).rejects.toThrow(InternalServerErrorException);
       expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith(
         'message.REGISTRATION_FAILED',
       );
