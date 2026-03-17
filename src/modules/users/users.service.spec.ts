@@ -21,6 +21,7 @@ describe('UsersService', () => {
     findAll: jest.fn(),
     findById: jest.fn(),
     findByEmail: jest.fn(),
+    findMailExists: jest.fn(),
     updateUser: jest.fn(),
   };
 
@@ -114,17 +115,13 @@ describe('UsersService', () => {
         username: 'john',
         email: 'john@example.com',
       });
-      mockUsersRepository.findByEmail.mockResolvedValue({
-        id: 2,
-        username: 'jane',
-        email: 'jane@example.com',
-      });
+      mockUsersRepository.findMailExists.mockResolvedValue(true);
       mockSharedService.getSharedMessage.mockReturnValue('Email already exists');
 
       await expect(service.update(1, { email: 'jane@example.com' })).rejects.toThrow(
         BadRequestException,
       );
-      expect(mockUsersRepository.findByEmail).toHaveBeenCalledWith('jane@example.com');
+      expect(mockUsersRepository.findMailExists).toHaveBeenCalledWith('jane@example.com', 1);
       expect(mockUsersRepository.updateUser).not.toHaveBeenCalled();
       expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith('message.EMAIL_ALREADY_EXISTS');
     });

@@ -20,14 +20,17 @@ export class AuthService {
     private readonly sharedService: SharedService,
   ) {}
 
-  async register(registerDto: RegisterDto) {
-    const emailInUse = await this.authRepository.existsByEmail(registerDto.email);
-
-    if (emailInUse) {
+  async checkEmailExistsOrThrow(email: string): Promise<void> {
+    const emailExist = await this.authRepository.existsByEmail(email);
+    if (emailExist) {
       throw new BadRequestException(
         this.sharedService.getSharedMessage('message.EMAIL_ALREADY_EXISTS'),
       );
     }
+  }
+
+  async register(registerDto: RegisterDto) {
+    await this.checkEmailExistsOrThrow(registerDto.email);
 
     try {
       const hashedPassword = await bcrypt.hash(
