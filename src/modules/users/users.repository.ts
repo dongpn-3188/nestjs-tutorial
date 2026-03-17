@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { User } from '../../database/Entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -23,6 +23,10 @@ export class UsersRepository {
     return this.userRepository.save(user);
   }
 
+  findMailExists(email: string, id: number): Promise<boolean> {
+    return this.userRepository.exists({ where: { email, id: Not(id) } });
+  }
+  
   async updateUser(user: User, updateUserDto: UpdateUserDto): Promise<User> {
     Object.assign(user, updateUserDto);
     return this.save(user);

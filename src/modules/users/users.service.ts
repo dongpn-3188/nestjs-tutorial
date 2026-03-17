@@ -30,9 +30,13 @@ export class UsersService {
     return user;
   }
 
-  async checkEmailExists(email: string): Promise<boolean> {
-    const user = await this.usersRepository.findByEmail(email);
-    return !!user;
+  async checkEmailExistsOrThrow(email: string, id: number): Promise<void> {
+    const emailExist = await this.usersRepository.findMailExists(email, id);
+    if (emailExist) {
+      throw new BadRequestException(
+        this.sharedService.getSharedMessage('message.EMAIL_ALREADY_EXISTS'),
+      );
+    }
   }
 
   async findOne(id: number) {
@@ -44,12 +48,7 @@ export class UsersService {
     const userExist = await this.loadUserOrThrow(id);
 
     if (data.email) {
-      const emailExist = await this.checkEmailExists(data.email);
-      if (emailExist && data.email !== userExist.email) {
-        throw new BadRequestException(
-          this.sharedService.getSharedMessage('message.EMAIL_ALREADY_EXISTS'),
-        );
-      }
+      await this.checkEmailExistsOrThrow(data.email, id);
     }
 
     try {
