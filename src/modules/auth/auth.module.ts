@@ -9,6 +9,7 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthRepository } from './auth.repository';
 import { CommonModule } from '../../common/common.module';
+import { resolveJwtSecret } from './utils/jwt-secret.util';
 
 @Module({
   imports: [
@@ -17,20 +18,9 @@ import { CommonModule } from '../../common/common.module';
     CommonModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => {
-        const configuredSecret = configService.get<string>('JWT_SECRET');
-        const nodeEnv = process.env.NODE_ENV;
-
-        if (!configuredSecret) {
-          if (nodeEnv === 'development' || nodeEnv === 'test') {
-            return { secret: 'dev_jwt_secret' };
-          }
-
-          throw new Error('JWT_SECRET configuration is missing');
-        }
-
-        return { secret: configuredSecret };
-      },
+      useFactory: (configService: ConfigService) => ({
+        secret: resolveJwtSecret(configService),
+      }),
       inject: [ConfigService],
     }),
   ],

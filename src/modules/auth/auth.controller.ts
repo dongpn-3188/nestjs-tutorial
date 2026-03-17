@@ -15,8 +15,8 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
-  
-  @Post('login') // eslint-disable-line
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  @Post('login')
   @ApiOperation({ summary: 'Login and get access token' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);

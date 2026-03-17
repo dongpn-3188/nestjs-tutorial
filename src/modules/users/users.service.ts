@@ -44,7 +44,7 @@ export class UsersService {
 
     if (data.email && data.email !== userExist.email) {
       const emailExist = await this.checkEmailExists(data.email);
-      if (emailExist && data.email !== userExist.email) {
+      if (emailExist) {
         throw new BadRequestException(
           this.sharedService.getSharedMessage('message.EMAIL_ALREADY_EXISTS'),
         );
