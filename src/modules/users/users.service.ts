@@ -30,6 +30,15 @@ export class UsersService {
     return user;
   }
 
+  async checkUserExistOrThrow(id: number): Promise<void> {
+    const userExist = await this.usersRepository.findUserExists(id);
+    if (!userExist) {
+      throw new NotFoundException(
+        this.sharedService.getSharedMessage('message.USER_NOT_FOUND'),
+      );
+    }
+  }
+
   async checkEmailExistsOrThrow(email: string, id: number): Promise<void> {
     const emailExist = await this.usersRepository.findMailExists(email, id);
     if (emailExist) {

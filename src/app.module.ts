@@ -13,6 +13,8 @@ import { join } from 'path';
 import { CommonModule } from './common/common.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ArticleModule } from './modules/article/article.module';
+import { TagModule } from './modules/tag/tag.module';
 
 @Module({
   imports: [
@@ -45,6 +47,7 @@ import { AuthModule } from './modules/auth/auth.module';
     CommonModule,
     UsersModule,
     AuthModule,
+    TagModule,
   ],
   controllers: [AppController],
   providers: [AppService],

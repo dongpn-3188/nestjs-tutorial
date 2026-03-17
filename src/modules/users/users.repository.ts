@@ -15,16 +15,16 @@ export class UsersRepository {
     return this.userRepository.findOneBy({ id });
   }
 
-  findByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findOneBy({ email });
-  }
-
   save(user: User): Promise<User> {
     return this.userRepository.save(user);
   }
 
   findMailExists(email: string, id: number): Promise<boolean> {
     return this.userRepository.exists({ where: { email, id: Not(id) } });
+  }
+
+  findUserExists(id: number): Promise<boolean> {
+    return this.userRepository.exists({ where: { id } });
   }
   
   async updateUser(user: User, updateUserDto: UpdateUserDto): Promise<User> {

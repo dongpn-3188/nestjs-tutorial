@@ -2,7 +2,12 @@
   "HELLO": "Hello World!",
   "EMAIL_ALREADY_EXISTS": "Email already exists",
   "INVALID_EMAIL_OR_PASSWORD": "Invalid email or password",
+  "NOT_FOUND": "{{entity}} not found",
   "USER_NOT_FOUND": "User not found",
   "USER_UPDATE_FAILED": "Failed to update user",
-  "REGISTRATION_FAILED": "Registration failed"
+  "REGISTRATION_FAILED": "Registration failed",
+  "ARTICLE_FORBIDDEN": "You are not allowed to perform this action on this article",
+  "ARTICLE_CREATE_FAILED": "Failed to create article",
+  "ARTICLE_UPDATE_FAILED": "Failed to update article",
+  "ARTICLE_DELETE_FAILED": "Failed to delete article"
 }
