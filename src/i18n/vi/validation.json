@@ -1,0 +1,11 @@
+{
+  "username": "ten dang nhap",
+  "email": "email",
+  "password": "mat khau",
+  "avatar": "anh dai dien",
+  "bio": "gioi thieu",
+  "REQUIRED": "$t(validation.{property}) khong duoc de trong",
+  "STRING": "$t(validation.{property}) phai la chuoi",
+  "INVALID_EMAIL": "$t(validation.{property}) khong hop le",
+  "LENGTH": "$t(validation.{property}) phai co do dai tu {constraints.0} den {constraints.1} ky tu"
+}
