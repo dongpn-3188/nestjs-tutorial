@@ -63,6 +63,15 @@ export class CreateArticleAndTagTables1773711200000
       true,
     );
 
+    // article.author_id: create explicit index before FK to prevent MySQL auto-generating one
+    await queryRunner.createIndex(
+      'article',
+      new TableIndex({
+        name: 'IDX_article_author_id',
+        columnNames: ['author_id'],
+      }),
+    );
+
     await queryRunner.createForeignKey(
       'article',
       new TableForeignKey({
@@ -73,6 +82,9 @@ export class CreateArticleAndTagTables1773711200000
       }),
     );
 
+    // article_tag_links: composite PK (articleId, tagId)
+    // - articleId is the leftmost PK prefix → already indexed by PK, no extra index needed
+    // - tagId is not covered by PK alone → explicit index before FK to prevent MySQL auto-index
     await queryRunner.createTable(
       new Table({
         name: 'article_tag_links',
@@ -90,6 +102,14 @@ export class CreateArticleAndTagTables1773711200000
         ],
       }),
       true,
+    );
+
+    await queryRunner.createIndex(
+      'article_tag_links',
+      new TableIndex({
+        name: 'IDX_article_tag_links_tagId',
+        columnNames: ['tagId'],
+      }),
     );
 
     await queryRunner.createForeignKey(
@@ -111,52 +131,28 @@ export class CreateArticleAndTagTables1773711200000
         onDelete: 'CASCADE',
       }),
     );
-
-    await queryRunner.createIndex(
-      'article_tag_links',
-      new TableIndex({
-        name: 'IDX_article_tag_links_articleId',
-        columnNames: ['articleId'],
-      }),
-    );
-
-    await queryRunner.createIndex(
-      'article_tag_links',
-      new TableIndex({
-        name: 'IDX_article_tag_links_tagId',
-        columnNames: ['tagId'],
-      }),
-    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropIndex(
-      'article_tag_links',
-      'IDX_article_tag_links_tagId',
-    );
-    await queryRunner.dropIndex(
-      'article_tag_links',
-      'IDX_article_tag_links_articleId',
-    );
-
     const joinTable = await queryRunner.getTable('article_tag_links');
     if (joinTable) {
-      const joinForeignKeys = [...joinTable.foreignKeys];
-      for (const foreignKey of joinForeignKeys) {
+      for (const foreignKey of joinTable.foreignKeys) {
         await queryRunner.dropForeignKey('article_tag_links', foreignKey);
       }
     }
+    await queryRunner.dropIndex('article_tag_links', 'IDX_article_tag_links_tagId');
     await queryRunner.dropTable('article_tag_links');
 
     const articleTable = await queryRunner.getTable('article');
     if (articleTable) {
-      const authorForeignKey = articleTable.foreignKeys.find((foreignKey) =>
-        foreignKey.columnNames.includes('author_id'),
+      const authorForeignKey = articleTable.foreignKeys.find((fk) =>
+        fk.columnNames.includes('author_id'),
       );
       if (authorForeignKey) {
         await queryRunner.dropForeignKey('article', authorForeignKey);
       }
     }
+    await queryRunner.dropIndex('article', 'IDX_article_author_id');
     await queryRunner.dropTable('article');
     await queryRunner.dropTable('tag');
   }

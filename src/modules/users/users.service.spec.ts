@@ -18,9 +18,7 @@ describe('UsersService', () => {
   let service: UsersService;
 
   const mockUsersRepository = {
-    findAll: jest.fn(),
     findById: jest.fn(),
-    findByEmail: jest.fn(),
     findMailExists: jest.fn(),
     updateUser: jest.fn(),
   };

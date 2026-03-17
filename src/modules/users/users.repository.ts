@@ -23,8 +23,8 @@ export class UsersRepository {
     return this.userRepository.save(user);
   }
 
-  findMailExists(email: string, id: number): Promise<User | null> {
-    return this.userRepository.findOne({ where: { email, id: Not(id) } });
+  findMailExists(email: string, id: number): Promise<boolean> {
+    return this.userRepository.exists({ where: { email, id: Not(id) } });
   }
   
   async updateUser(user: User, updateUserDto: UpdateUserDto): Promise<User> {
