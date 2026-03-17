@@ -10,11 +10,10 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthRepository } from './auth.repository';
 import { SharedService } from '../../common/shared.service';
+import { SALT_ROUNDS } from '../../common/constants';
 
 @Injectable()
 export class AuthService {
-  private readonly saltRounds = 10;
-
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
@@ -30,12 +29,11 @@ export class AuthService {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(
-      registerDto.password,
-      this.saltRounds,
-    );
-
     try {
+      const hashedPassword = await bcrypt.hash(
+        registerDto.password,
+        SALT_ROUNDS,
+      );
       const savedUser = await this.authRepository.createUser(registerDto, hashedPassword);
       const payload = { sub: savedUser.id, email: savedUser.email };
 

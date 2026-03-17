@@ -11,6 +11,7 @@ import { SharedService } from '../../common/shared.service';
 import * as bcrypt from 'bcryptjs';
 import { UserSerializer } from './serializers/user.serializer';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { SALT_ROUNDS } from '../../common/constants';
 
 @Injectable()
 export class UsersService {
@@ -42,22 +43,22 @@ export class UsersService {
   async update(id: number, data: UpdateUserDto) {
     const userExist = await this.loadUserOrThrow(id);
 
-    if (data.email && data.email !== userExist.email) {
+    if (data.email) {
       const emailExist = await this.checkEmailExists(data.email);
-      if (emailExist) {
+      if (emailExist && data.email !== userExist.email) {
         throw new BadRequestException(
           this.sharedService.getSharedMessage('message.EMAIL_ALREADY_EXISTS'),
         );
       }
     }
 
-    if (data.password) {
-      const hashedPassword = await bcrypt.hash(data.password, 10);
-      data.password = hashedPassword;
-    }
-
     try {
-      const updatedUser = await this.usersRepository.updateUser(userExist, data);
+      const updateData: Partial<UpdateUserDto> = { ...data };
+      if (data.password) {
+        const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
+        updateData.password = hashedPassword;
+      }
+      const updatedUser = await this.usersRepository.updateUser(userExist, updateData);
       return new UserSerializer(updatedUser, { type: 'BASIC_INFO' }).serialize();
     } catch {
       throw new InternalServerErrorException({

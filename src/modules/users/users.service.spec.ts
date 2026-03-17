@@ -1,9 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, HttpStatus, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersRepository } from './users.repository';
 import { SharedService } from '../../common/shared.service';
 import * as bcrypt from 'bcryptjs';
+import { SALT_ROUNDS } from '../../common/constants';
 
 jest.mock('bcryptjs', () => ({
   hash: jest.fn(),
@@ -124,7 +129,7 @@ describe('UsersService', () => {
       expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith('message.EMAIL_ALREADY_EXISTS');
     });
 
-    it('should return error response when update fails unexpectedly', async () => {
+    it('should throw InternalServerErrorException when update fails unexpectedly', async () => {
       mockUsersRepository.findById.mockResolvedValue({
         id: 1,
         username: 'john',
@@ -133,13 +138,9 @@ describe('UsersService', () => {
       mockUsersRepository.updateUser.mockRejectedValue(new Error('db error'));
       mockSharedService.getSharedMessage.mockReturnValue('Failed to update user');
 
-      const result = await service.update(1, { username: 'john-new' });
-
-      expect(result).toEqual({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        errors: 'Internal Server Error',
-        message: 'Failed to update user',
-      });
+      await expect(service.update(1, { username: 'john-new' })).rejects.toThrow(
+        InternalServerErrorException,
+      );
       expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith('message.USER_UPDATE_FAILED');
     });
 
@@ -165,7 +166,7 @@ describe('UsersService', () => {
 
       const result = await service.update(1, updateDto);
 
-      expect(mockBcryptHash).toHaveBeenCalledWith('plain-password', 10);
+      expect(mockBcryptHash).toHaveBeenCalledWith('plain-password', SALT_ROUNDS);
       expect(mockUsersRepository.updateUser).toHaveBeenCalledWith(expect.objectContaining({
         id: 1,
         username: 'john',
