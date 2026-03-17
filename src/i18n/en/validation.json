@@ -1,0 +1,11 @@
+{
+  "username": "username",
+  "email": "email",
+  "password": "password",
+  "avatar": "avatar",
+  "bio": "bio",
+  "REQUIRED": "$t(validation.{property}) is required",
+  "STRING": "$t(validation.{property}) must be a string",
+  "INVALID_EMAIL": "$t(validation.{property}) is invalid",
+  "LENGTH": "$t(validation.{property}) must be between {constraints.0} and {constraints.1} characters"
+}
