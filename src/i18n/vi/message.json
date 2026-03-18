@@ -9,5 +9,6 @@
   "ARTICLE_FORBIDDEN": "Ban khong co quyen thuc hien hanh dong nay voi bai viet",
   "ARTICLE_CREATE_FAILED": "Tao bai viet that bai",
   "ARTICLE_UPDATE_FAILED": "Cap nhat bai viet that bai",
-  "ARTICLE_DELETE_FAILED": "Xoa bai viet that bai"
+  "ARTICLE_DELETE_FAILED": "Xoa bai viet that bai",
+  "TAG_SEARCH_KEYWORD_REQUIRED": "Tu khoa tim kiem la bat buoc"
 }

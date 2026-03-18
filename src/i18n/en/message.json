@@ -9,5 +9,6 @@
   "ARTICLE_FORBIDDEN": "You are not allowed to perform this action on this article",
   "ARTICLE_CREATE_FAILED": "Failed to create article",
   "ARTICLE_UPDATE_FAILED": "Failed to update article",
-  "ARTICLE_DELETE_FAILED": "Failed to delete article"
+  "ARTICLE_DELETE_FAILED": "Failed to delete article",
+  "TAG_SEARCH_KEYWORD_REQUIRED": "Search keyword is required"
 }

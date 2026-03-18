@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { ILike, In, Repository } from 'typeorm';
 import { Tag } from '../../database/Entities/tag.entity';
 
 @Injectable()
@@ -24,6 +24,19 @@ export class TagRepository {
 
   findAll(limit: number, offset: number): Promise<[Tag[], number]> {
     return this.tagRepository.findAndCount({
+      order: {
+        name: 'ASC',
+      },
+      take: limit,
+      skip: offset,
+    });
+  }
+
+  searchByName(keyword: string, limit: number, offset: number): Promise<[Tag[], number]> {
+    return this.tagRepository.findAndCount({
+      where: {
+        name: ILike(`%${keyword}%`),
+      },
       order: {
         name: 'ASC',
       },

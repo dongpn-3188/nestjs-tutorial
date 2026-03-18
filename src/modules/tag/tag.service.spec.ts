@@ -1,13 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BadRequestException } from '@nestjs/common';
 import { DEFAULT_LIMIT, DEFAULT_OFFSET } from '../../common/constants';
 import { TagService } from './tag.service';
 import { TagRepository } from './tag.repository';
+import { SharedService } from '../../common/shared.service';
 
 describe('TagService', () => {
   let service: TagService;
 
   const mockTagRepository = {
     findAll: jest.fn(),
+    searchByName: jest.fn(),
+  };
+
+  const mockSharedService = {
+    normalizedLimitAndOffset: jest.fn((limit: number, offset: number) => ({ limit, offset })),
+    getSharedMessage: jest.fn((key: string) => key),
   };
 
   beforeEach(async () => {
@@ -19,6 +27,10 @@ describe('TagService', () => {
         {
           provide: TagRepository,
           useValue: mockTagRepository,
+        },
+        {
+          provide: SharedService,
+          useValue: mockSharedService,
         },
       ],
     }).compile();
@@ -45,9 +57,9 @@ describe('TagService', () => {
     expect(result).toEqual({
       tags: ['nestjs', 'typescript'],
       page: {
-        limit: 10,
-        offset: 5,
-        total: 12,
+        itemCount: 10,
+        number: 6,
+        totalItems: 12,
       },
     });
   });
@@ -57,6 +69,32 @@ describe('TagService', () => {
 
     await service.findAll();
 
+    expect(mockSharedService.normalizedLimitAndOffset).toHaveBeenCalledWith(
+      DEFAULT_LIMIT,
+      DEFAULT_OFFSET,
+      100,
+    );
     expect(mockTagRepository.findAll).toHaveBeenCalledWith(DEFAULT_LIMIT, DEFAULT_OFFSET);
+  });
+
+  it('should search tags by keyword', async () => {
+    mockTagRepository.searchByName.mockResolvedValue([[{ id: 1, name: 'nestjs' }], 1]);
+
+    const result = await service.searchByName('nest', 10, 2);
+
+    expect(mockTagRepository.searchByName).toHaveBeenCalledWith('nest', 10, 2);
+    expect(result).toEqual({
+      tags: ['nestjs'],
+      page: {
+        itemCount: 10,
+        number: 3,
+        totalItems: 1,
+      },
+    });
+  });
+
+  it('should throw BadRequestException for empty keyword', async () => {
+    await expect(service.searchByName('   ')).rejects.toBeInstanceOf(BadRequestException);
+    expect(mockTagRepository.searchByName).not.toHaveBeenCalled();
   });
 });

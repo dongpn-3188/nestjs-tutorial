@@ -9,12 +9,25 @@ export class TagController {
 
   @Get()
   @ApiOperation({ summary: 'Get all tags' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
-  @ApiQuery({ name: 'offset', required: false, type: Number, example: 0 })
+  @ApiQuery({ name: 'itemCount', required: false, type: Number, example: 20 })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 0 })
   async findAll(
-    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
-    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query('itemCount', new ParseIntPipe({ optional: true })) itemCount?: number,
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
   ) {
-    return this.tagService.findAll(limit, offset);
+    return this.tagService.findAll(itemCount, page);
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Search tags by keyword' })
+  @ApiQuery({ name: 'q', required: true, type: String, example: 'nest' })
+  @ApiQuery({ name: 'itemCount', required: false, type: Number, example: 20 })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 0 })
+  async searchByName(
+    @Query('q') keyword: string,
+    @Query('itemCount', new ParseIntPipe({ optional: true })) itemCount?: number,
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+  ) {
+    return this.tagService.searchByName(keyword, itemCount, page);
   }
 }
