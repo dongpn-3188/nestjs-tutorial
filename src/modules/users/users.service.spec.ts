@@ -19,9 +19,9 @@ describe('UsersService', () => {
 
   const mockUsersRepository = {
     findById: jest.fn(),
-    findByIdWithFollowing: jest.fn(),
     isFollowingUser: jest.fn(),
-    save: jest.fn(),
+    addFollowing: jest.fn(),
+    removeFollowing: jest.fn(),
     findUserExists: jest.fn(),
     findMailExists: jest.fn(),
     updateUser: jest.fn(),
@@ -227,20 +227,16 @@ describe('UsersService', () => {
   describe('follow', () => {
     it('should add target user to current user following list', async () => {
       const targetUser = { id: 2, username: 'jane', avatar: null, bio: null };
-      const currentUser = { id: 1, following: [] };
-      const savedCurrentUser = { id: 1, following: [targetUser] };
 
       mockUsersRepository.findById.mockResolvedValue(targetUser);
-      mockUsersRepository.findByIdWithFollowing.mockResolvedValueOnce(currentUser);
-      mockUsersRepository.save.mockResolvedValue(savedCurrentUser);
-      mockUsersRepository.isFollowingUser.mockResolvedValue(true);
+      mockUsersRepository.isFollowingUser
+        .mockResolvedValueOnce(false)
+        .mockResolvedValueOnce(true);
+      mockUsersRepository.addFollowing.mockResolvedValue(undefined);
 
       const result = await service.follow(2, 1);
 
-      expect(mockUsersRepository.save).toHaveBeenCalledWith({
-        id: 1,
-        following: [targetUser],
-      });
+      expect(mockUsersRepository.addFollowing).toHaveBeenCalledWith(1, 2);
       expect(result.following).toBe(true);
     });
 
@@ -251,30 +247,38 @@ describe('UsersService', () => {
       });
 
       await expect(service.follow(1, 1)).rejects.toThrow(BadRequestException);
-      expect(mockUsersRepository.save).not.toHaveBeenCalled();
+      expect(mockUsersRepository.addFollowing).not.toHaveBeenCalled();
     });
   });
 
   describe('unfollow', () => {
     it('should remove target user from following list', async () => {
       const targetUser = { id: 2, username: 'jane', avatar: null, bio: null };
-      const currentUser = {
-        id: 1,
-        following: [targetUser, { id: 3, username: 'mike', avatar: null, bio: null }],
-      };
-      const savedCurrentUser = {
-        id: 1,
-        following: [{ id: 3, username: 'mike', avatar: null, bio: null }],
-      };
 
       mockUsersRepository.findById.mockResolvedValue(targetUser);
-      mockUsersRepository.findByIdWithFollowing.mockResolvedValueOnce(currentUser);
-      mockUsersRepository.save.mockResolvedValue(savedCurrentUser);
+      mockUsersRepository.isFollowingUser
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      mockUsersRepository.removeFollowing.mockResolvedValue(undefined);
+
+      const result = await service.unfollow(2, 1);
+
+      expect(mockUsersRepository.removeFollowing).toHaveBeenCalledWith(1, 2);
+      expect(result.following).toBe(false);
+    });
+
+    it('should not remove relation when user does not follow target', async () => {
+      mockUsersRepository.findById.mockResolvedValue({
+        id: 2,
+        username: 'jane',
+        avatar: null,
+        bio: null,
+      });
       mockUsersRepository.isFollowingUser.mockResolvedValue(false);
 
       const result = await service.unfollow(2, 1);
 
-      expect(mockUsersRepository.save).toHaveBeenCalledWith(savedCurrentUser);
+      expect(mockUsersRepository.removeFollowing).not.toHaveBeenCalled();
       expect(result.following).toBe(false);
     });
   });

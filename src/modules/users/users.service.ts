@@ -30,16 +30,6 @@ export class UsersService {
     return user;
   }
 
-  async loadByIdWithFollowingOrThrow(id: number): Promise<User> {
-    const user = await this.usersRepository.findByIdWithFollowing(id);
-    if (!user) {
-      throw new NotFoundException(
-        this.sharedService.getSharedMessage('message.USER_NOT_FOUND'),
-      );
-    }
-    return user;
-  }
-
   private async isFollowingUser(
     currentUserId: number | undefined,
     targetUserId: number,
@@ -96,18 +86,13 @@ export class UsersService {
       );
     }
 
-    const currentUserWithFollowing = await this.loadByIdWithFollowingOrThrow(currentUserId);
-
-    const hasFollowed = currentUserWithFollowing.following?.some(
-      (user) => user.id === targetUser.id,
+    const hasFollowed = await this.usersRepository.isFollowingUser(
+      currentUserId,
+      targetUser.id,
     );
 
     if (!hasFollowed) {
-      currentUserWithFollowing.following = [
-        ...(currentUserWithFollowing.following || []),
-        targetUser,
-      ];
-      await this.usersRepository.save(currentUserWithFollowing);
+      await this.usersRepository.addFollowing(currentUserId, targetUser.id);
     }
 
     return this.serializeProfile(targetUser, currentUserId);
@@ -115,12 +100,15 @@ export class UsersService {
 
   async unfollow(targetUserId: number, currentUserId: number) {
     const targetUser = await this.loadUserOrThrow(targetUserId);
-    const currentUserWithFollowing = await this.loadByIdWithFollowingOrThrow(currentUserId);
 
-    currentUserWithFollowing.following = (currentUserWithFollowing.following || []).filter(
-      (user) => user.id !== targetUser.id,
+    const hasFollowed = await this.usersRepository.isFollowingUser(
+      currentUserId,
+      targetUser.id,
     );
-    await this.usersRepository.save(currentUserWithFollowing);
+
+    if (hasFollowed) {
+      await this.usersRepository.removeFollowing(currentUserId, targetUser.id);
+    }
 
     return this.serializeProfile(targetUser, currentUserId);
   }

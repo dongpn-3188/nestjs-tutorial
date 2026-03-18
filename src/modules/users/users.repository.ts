@@ -15,22 +15,29 @@ export class UsersRepository {
     return this.userRepository.findOneBy({ id });
   }
 
-  findByIdWithFollowing(id: number): Promise<User | null> {
-    return this.userRepository.findOne({
-      where: { id },
-      relations: { following: true },
-    });
-  }
-
   async isFollowingUser(followerId: number, followingId: number): Promise<boolean> {
-    const count = await this.userRepository
+    return this.userRepository
       .createQueryBuilder('user')
       .innerJoin('user.following', 'following')
       .where('user.id = :followerId', { followerId })
       .andWhere('following.id = :followingId', { followingId })
-      .getCount();
+      .getExists();
+  }
 
-    return count > 0;
+  addFollowing(followerId: number, followingId: number): Promise<void> {
+    return this.userRepository
+      .createQueryBuilder()
+      .relation(User, 'following')
+      .of(followerId)
+      .add(followingId);
+  }
+
+  removeFollowing(followerId: number, followingId: number): Promise<void> {
+    return this.userRepository
+      .createQueryBuilder()
+      .relation(User, 'following')
+      .of(followerId)
+      .remove(followingId);
   }
 
   save(user: User): Promise<User> {
