@@ -10,5 +10,6 @@
   "ARTICLE_CREATE_FAILED": "Failed to create article",
   "ARTICLE_UPDATE_FAILED": "Failed to update article",
   "ARTICLE_DELETE_FAILED": "Failed to delete article",
-  "TAG_SEARCH_KEYWORD_REQUIRED": "Search keyword is required"
+  "TAG_SEARCH_KEYWORD_REQUIRED": "Search keyword is required",
+  "CANNOT_FOLLOW_YOURSELF": "You cannot follow yourself"
 }
