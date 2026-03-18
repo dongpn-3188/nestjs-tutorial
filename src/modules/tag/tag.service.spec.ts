@@ -58,7 +58,7 @@ describe('TagService', () => {
       tags: ['nestjs', 'typescript'],
       page: {
         itemCount: 10,
-        number: 6,
+        pageNumber: 6,
         totalItems: 12,
       },
     });
@@ -87,7 +87,7 @@ describe('TagService', () => {
       tags: ['nestjs'],
       page: {
         itemCount: 10,
-        number: 3,
+        pageNumber: 3,
         totalItems: 1,
       },
     });

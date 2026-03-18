@@ -1,8 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DEFAULT_LIMIT, DEFAULT_OFFSET } from '../../common/constants';
 import { TagRepository } from './tag.repository';
-import { Tag } from '../../database/Entities/tag.entity';
 import { SharedService } from '../../common/shared.service';
+import { Tag } from '../../database/Entities/tag.entity';
+import { TagSerializer } from './serializers/tag.serializer';
 
 // Maximum number of tags that can be returned in a single page
 const MAX_TAG_PAGE_LIMIT = 100;
@@ -13,22 +14,6 @@ export class TagService {
     private readonly tagRepository: TagRepository,
     private readonly sharedService: SharedService,
   ) {}
-
-  private serializeTags(
-    tags: Tag[],
-    offset: number,
-    limit: number,
-    totalCount: number,
-  ) {
-    return {
-      tags: tags.map((tag) => tag.name),
-      page: {
-        itemCount: limit,
-        pageNumber: offset + 1,
-        totalItems: totalCount,
-      },
-    };
-  }
 
   findTagsByNames(tagNames: string[]): Promise<Tag[]> {
     return this.tagRepository.findTagsByNames(tagNames);
@@ -42,7 +27,15 @@ export class TagService {
         MAX_TAG_PAGE_LIMIT,
       );
     const [tags, totalCount] = await this.tagRepository.findAll(normalizedLimit, normalizedOffset);
-    return this.serializeTags(tags, normalizedOffset, normalizedLimit, totalCount);
+    return new TagSerializer(
+      {
+        tags,
+        offset: normalizedOffset,
+        limit: normalizedLimit,
+        totalCount,
+      },
+      { type: 'LIST' },
+    ).serialize();
   }
 
   async searchByName(keyword: string, limit = DEFAULT_LIMIT, offset = DEFAULT_OFFSET) {
@@ -65,6 +58,14 @@ export class TagService {
       normalizedOffset,
     );
 
-    return this.serializeTags(tags, normalizedOffset, normalizedLimit, totalCount);
+    return new TagSerializer(
+      {
+        tags,
+        offset: normalizedOffset,
+        limit: normalizedLimit,
+        totalCount,
+      },
+      { type: 'LIST' },
+    ).serialize();
   }
 }
