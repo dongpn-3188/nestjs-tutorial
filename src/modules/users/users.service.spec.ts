@@ -19,6 +19,7 @@ describe('UsersService', () => {
 
   const mockUsersRepository = {
     findById: jest.fn(),
+    findUserExists: jest.fn(),
     findMailExists: jest.fn(),
     updateUser: jest.fn(),
   };
@@ -66,6 +67,23 @@ describe('UsersService', () => {
       expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith('message.USER_NOT_FOUND');
     });
 
+  });
+
+  describe('checkUserExistOrThrow', () => {
+    it('should not throw when user exists', async () => {
+      mockUsersRepository.findUserExists.mockResolvedValue(true);
+
+      await expect(service.checkUserExistOrThrow(1)).resolves.toBeUndefined();
+      expect(mockUsersRepository.findUserExists).toHaveBeenCalledWith(1);
+    });
+
+    it('should throw NotFoundException when user does not exist', async () => {
+      mockUsersRepository.findUserExists.mockResolvedValue(false);
+      mockSharedService.getSharedMessage.mockReturnValue('User not found');
+
+      await expect(service.checkUserExistOrThrow(1)).rejects.toThrow(NotFoundException);
+      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith('message.USER_NOT_FOUND');
+    });
   });
 
   describe('update', () => {
