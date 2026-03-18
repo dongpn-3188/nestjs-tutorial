@@ -33,7 +33,7 @@ describe('TagController', () => {
   it('should return all tags', async () => {
     const expected = {
       tags: ['nestjs', 'typescript'],
-      page: { itemCount: 10, number: 6, totalItems: 12 },
+      page: { itemCount: 10, pageNumber: 6, totalItems: 12 },
     };
     mockTagService.findAll.mockResolvedValue(expected);
 
@@ -46,7 +46,7 @@ describe('TagController', () => {
   it('should search tags by keyword', async () => {
     const expected = {
       tags: ['nestjs'],
-      page: { itemCount: 20, number: 1, totalItems: 1 },
+      page: { itemCount: 20, pageNumber: 1, totalItems: 1 },
     };
     mockTagService.searchByName.mockResolvedValue(expected);
 

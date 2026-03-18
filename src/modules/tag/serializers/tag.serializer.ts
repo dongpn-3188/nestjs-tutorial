@@ -1,4 +1,5 @@
 import { Tag } from '../../../database/Entities/tag.entity';
+import { TagItemSerializer, TagItemSerializerType } from './tag-item.serializer';
 
 export type TagSerializerType = 'LIST';
 
@@ -16,7 +17,7 @@ export type TagListSerializerPayload = {
 export class TagSerializer {
   constructor(
     private readonly payload: TagListSerializerPayload,
-    private readonly options: { type: TagSerializerType },
+    private readonly options: { type: TagSerializerType; tagType: TagItemSerializerType },
   ) {}
 
   private get allowedFields(): string[] {
@@ -25,7 +26,9 @@ export class TagSerializer {
 
   private get normalizedPayload(): Record<string, any> {
     return {
-      tags: this.payload.tags.map((tag) => tag.name),
+      tags: this.payload.tags.map((tag) =>
+        new TagItemSerializer(tag, { type: this.options.tagType }).serialize(),
+      ),
       page: {
         itemCount: this.payload.limit,
         pageNumber: this.payload.offset + 1,

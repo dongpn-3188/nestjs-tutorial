@@ -34,7 +34,7 @@ export class TagService {
         limit: normalizedLimit,
         totalCount,
       },
-      { type: 'LIST' },
+      { type: 'LIST', tagType: 'NAME' },
     ).serialize();
   }
 
@@ -65,7 +65,7 @@ export class TagService {
         limit: normalizedLimit,
         totalCount,
       },
-      { type: 'LIST' },
+      { type: 'LIST', tagType: 'NAME' },
     ).serialize();
   }
 }
