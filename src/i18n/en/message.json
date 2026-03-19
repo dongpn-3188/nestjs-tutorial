@@ -10,8 +10,9 @@
   "ARTICLE_CREATE_FAILED": "Failed to create article",
   "ARTICLE_UPDATE_FAILED": "Failed to update article",
   "ARTICLE_DELETE_FAILED": "Failed to delete article",
+  "ARTICLE_DELETE_SUCCESS": "Article deleted successfully",
   "TAG_SEARCH_KEYWORD_REQUIRED": "Search keyword is required",
-  "CANNOT_FOLLOW_YOURSELF": "You cannot follow yourself",
+  "CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF": "You cannot follow or unfollow yourself",
   "USER_FOLLOW_FAILED": "Failed to follow user",
   "USER_UNFOLLOW_FAILED": "Failed to unfollow user"
 }
