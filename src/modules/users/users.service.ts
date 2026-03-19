@@ -77,39 +77,64 @@ export class UsersService {
     return this.serializeProfile(user, currentUserId);
   }
 
-  async follow(targetUserId: number, currentUserId: number) {
-    const targetUser = await this.loadUserOrThrow(targetUserId);
-
-    if (targetUser.id === currentUserId) {
+  private async validateTargetFollowUser(
+    targetUserId: number,
+    currentUserId: number,
+  ): Promise<void> {
+    if (targetUserId === currentUserId) {
       throw new BadRequestException(
         this.sharedService.getSharedMessage('message.CANNOT_FOLLOW_YOURSELF'),
       );
     }
 
-    const hasFollowed = await this.usersRepository.isFollowingUser(
-      currentUserId,
-      targetUser.id,
-    );
+    await this.checkUserExistOrThrow(targetUserId);
+  }
 
-    if (!hasFollowed) {
-      await this.usersRepository.addFollowing(currentUserId, targetUser.id);
+  async follow(targetUserId: number, currentUserId: number) {
+    await this.validateTargetFollowUser(targetUserId, currentUserId);
+
+    try {
+      const hasFollowed = await this.usersRepository.isFollowingUser(
+        currentUserId,
+        targetUserId,
+      );
+
+      if (!hasFollowed) {
+        await this.usersRepository.addFollowing(currentUserId, targetUserId);
+      }
+    } catch {
+      throw new InternalServerErrorException({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        errors: 'Internal Server Error',
+        message: this.sharedService.getSharedMessage('message.USER_FOLLOW_FAILED'),
+      });
     }
 
+    const targetUser = await this.loadUserOrThrow(targetUserId);
     return this.serializeProfile(targetUser, currentUserId);
   }
 
   async unfollow(targetUserId: number, currentUserId: number) {
-    const targetUser = await this.loadUserOrThrow(targetUserId);
+    await this.checkUserExistOrThrow(targetUserId);
 
-    const hasFollowed = await this.usersRepository.isFollowingUser(
-      currentUserId,
-      targetUser.id,
-    );
+    try {
+      const hasFollowed = await this.usersRepository.isFollowingUser(
+        currentUserId,
+        targetUserId,
+      );
 
-    if (hasFollowed) {
-      await this.usersRepository.removeFollowing(currentUserId, targetUser.id);
+      if (hasFollowed) {
+        await this.usersRepository.removeFollowing(currentUserId, targetUserId);
+      }
+    } catch {
+      throw new InternalServerErrorException({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        errors: 'Internal Server Error',
+        message: this.sharedService.getSharedMessage('message.USER_UNFOLLOW_FAILED'),
+      });
     }
 
+    const targetUser = await this.loadUserOrThrow(targetUserId);
     return this.serializeProfile(targetUser, currentUserId);
   }
 

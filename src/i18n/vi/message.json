@@ -11,5 +11,7 @@
   "ARTICLE_UPDATE_FAILED": "Cap nhat bai viet that bai",
   "ARTICLE_DELETE_FAILED": "Xoa bai viet that bai",
   "TAG_SEARCH_KEYWORD_REQUIRED": "Tu khoa tim kiem la bat buoc",
-  "CANNOT_FOLLOW_YOURSELF": "Ban khong the follow chinh minh"
+  "CANNOT_FOLLOW_YOURSELF": "Ban khong the follow chinh minh",
+  "USER_FOLLOW_FAILED": "Follow user that bai",
+  "USER_UNFOLLOW_FAILED": "Unfollow user that bai"
 }
