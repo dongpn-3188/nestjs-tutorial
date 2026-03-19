@@ -31,6 +31,7 @@ import { ArticleModule } from './modules/article/article.module';
       autoLoadEntities: true,
       migrations: [join(__dirname, 'database/migrations/*{.ts,.js}')],
       synchronize: false,
+      logging: true,
     }),
     I18nModule.forRoot({
       fallbackLanguage: 'en',
