@@ -5,10 +5,11 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { UsersRepository } from './users.repository';
 import { CommonModule } from '../../common/common.module';
+import { ProfilesController } from './profiles.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), CommonModule],
-  controllers: [UsersController],
+  controllers: [UsersController, ProfilesController],
   providers: [UsersService, UsersRepository],
   exports: [UsersService],
 })

@@ -19,6 +19,9 @@ describe('UsersService', () => {
 
   const mockUsersRepository = {
     findById: jest.fn(),
+    isFollowingUser: jest.fn(),
+    addFollowing: jest.fn(),
+    removeFollowing: jest.fn(),
     findUserExists: jest.fn(),
     findMailExists: jest.fn(),
     updateUser: jest.fn(),
@@ -194,6 +197,89 @@ describe('UsersService', () => {
         avatar: null,
         bio: null,
       });
+    });
+  });
+
+  describe('findProfileById', () => {
+    it('should return profile with following=true when current user follows target user', async () => {
+      mockUsersRepository.findById.mockResolvedValue({
+        id: 2,
+        username: 'jane',
+        avatar: null,
+        bio: null,
+      });
+      mockUsersRepository.isFollowingUser.mockResolvedValue(true);
+
+      const result = await service.findProfileById(2, 1);
+
+      expect(mockUsersRepository.findById).toHaveBeenCalledWith(2);
+      expect(mockUsersRepository.isFollowingUser).toHaveBeenCalledWith(1, 2);
+      expect(result).toEqual({
+        id: 2,
+        username: 'jane',
+        avatar: null,
+        bio: null,
+        following: true,
+      });
+    });
+  });
+
+  describe('follow', () => {
+    it('should add target user to current user following list', async () => {
+      const targetUser = { id: 2, username: 'jane', avatar: null, bio: null };
+
+      mockUsersRepository.findById.mockResolvedValue(targetUser);
+      mockUsersRepository.isFollowingUser
+        .mockResolvedValueOnce(false)
+        .mockResolvedValueOnce(true);
+      mockUsersRepository.addFollowing.mockResolvedValue(undefined);
+
+      const result = await service.follow(2, 1);
+
+      expect(mockUsersRepository.addFollowing).toHaveBeenCalledWith(1, 2);
+      expect(result.following).toBe(true);
+    });
+
+    it('should throw when user follows themselves', async () => {
+      mockUsersRepository.findById.mockResolvedValue({
+        id: 1,
+        username: 'john',
+      });
+
+      await expect(service.follow(1, 1)).rejects.toThrow(BadRequestException);
+      expect(mockUsersRepository.addFollowing).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('unfollow', () => {
+    it('should remove target user from following list', async () => {
+      const targetUser = { id: 2, username: 'jane', avatar: null, bio: null };
+
+      mockUsersRepository.findById.mockResolvedValue(targetUser);
+      mockUsersRepository.isFollowingUser
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      mockUsersRepository.removeFollowing.mockResolvedValue(undefined);
+
+      const result = await service.unfollow(2, 1);
+
+      expect(mockUsersRepository.removeFollowing).toHaveBeenCalledWith(1, 2);
+      expect(result.following).toBe(false);
+    });
+
+    it('should not remove relation when user does not follow target', async () => {
+      mockUsersRepository.findById.mockResolvedValue({
+        id: 2,
+        username: 'jane',
+        avatar: null,
+        bio: null,
+      });
+      mockUsersRepository.isFollowingUser.mockResolvedValue(false);
+
+      const result = await service.unfollow(2, 1);
+
+      expect(mockUsersRepository.removeFollowing).not.toHaveBeenCalled();
+      expect(result.following).toBe(false);
     });
   });
 });

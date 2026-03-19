@@ -30,6 +30,25 @@ export class UsersService {
     return user;
   }
 
+  private async isFollowingUser(
+    currentUserId: number | undefined,
+    targetUserId: number,
+  ): Promise<boolean> {
+    if (!currentUserId || currentUserId === targetUserId) {
+      return false;
+    }
+
+    return this.usersRepository.isFollowingUser(currentUserId, targetUserId);
+  }
+
+  private async serializeProfile(user: User, currentUserId?: number) {
+    const following = await this.isFollowingUser(currentUserId, user.id);
+    return new UserSerializer(
+      { ...user, following },
+      { type: 'PROFILE' },
+    ).serialize();
+  }
+
   async checkUserExistOrThrow(id: number): Promise<void> {
     const userExist = await this.usersRepository.findUserExists(id);
     if (!userExist) {
@@ -51,6 +70,72 @@ export class UsersService {
   async findOne(id: number) {
     const user = await this.loadUserOrThrow(id);
     return new UserSerializer(user, { type: 'BASIC_INFO' }).serialize();
+  }
+
+  async findProfileById(targetUserId: number, currentUserId?: number) {
+    const user = await this.loadUserOrThrow(targetUserId);
+    return this.serializeProfile(user, currentUserId);
+  }
+
+  private async validateTargetFollowUser(
+    targetUserId: number,
+    currentUserId: number,
+  ): Promise<void> {
+    if (targetUserId === currentUserId) {
+      throw new BadRequestException(
+        this.sharedService.getSharedMessage('message.CANNOT_FOLLOW_YOURSELF'),
+      );
+    }
+
+    await this.checkUserExistOrThrow(targetUserId);
+  }
+
+  async follow(targetUserId: number, currentUserId: number) {
+    await this.validateTargetFollowUser(targetUserId, currentUserId);
+
+    try {
+      const hasFollowed = await this.usersRepository.isFollowingUser(
+        currentUserId,
+        targetUserId,
+      );
+
+      if (!hasFollowed) {
+        await this.usersRepository.addFollowing(currentUserId, targetUserId);
+      }
+    } catch {
+      throw new InternalServerErrorException({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        errors: 'Internal Server Error',
+        message: this.sharedService.getSharedMessage('message.USER_FOLLOW_FAILED'),
+      });
+    }
+
+    const targetUser = await this.loadUserOrThrow(targetUserId);
+    return this.serializeProfile(targetUser, currentUserId);
+  }
+
+  async unfollow(targetUserId: number, currentUserId: number) {
+    await this.validateTargetFollowUser(targetUserId, currentUserId);
+
+    try {
+      const hasFollowed = await this.usersRepository.isFollowingUser(
+        currentUserId,
+        targetUserId,
+      );
+
+      if (hasFollowed) {
+        await this.usersRepository.removeFollowing(currentUserId, targetUserId);
+      }
+    } catch {
+      throw new InternalServerErrorException({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        errors: 'Internal Server Error',
+        message: this.sharedService.getSharedMessage('message.USER_UNFOLLOW_FAILED'),
+      });
+    }
+
+    const targetUser = await this.loadUserOrThrow(targetUserId);
+    return this.serializeProfile(targetUser, currentUserId);
   }
 
   async update(id: number, data: UpdateUserDto) {
