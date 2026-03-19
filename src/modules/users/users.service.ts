@@ -115,7 +115,7 @@ export class UsersService {
   }
 
   async unfollow(targetUserId: number, currentUserId: number) {
-    await this.checkUserExistOrThrow(targetUserId);
+    await this.validateTargetFollowUser(targetUserId, currentUserId);
 
     try {
       const hasFollowed = await this.usersRepository.isFollowingUser(
