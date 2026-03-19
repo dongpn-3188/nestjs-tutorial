@@ -51,10 +51,11 @@ export class ArticleItemSerializer {
     };
   }
   serialize(): Record<string, any> {
+    const normalizedArticle = this.normalizedArticle;
     return this.allowedFields.reduce(
       (acc, field) => {
-        if (this.normalizedArticle[field] !== undefined) {
-          acc[field] = this.normalizedArticle[field];
+        if (normalizedArticle[field] !== undefined) {
+          acc[field] = normalizedArticle[field];
         }
         return acc;
       },
