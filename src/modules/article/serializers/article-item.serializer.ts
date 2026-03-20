@@ -30,8 +30,8 @@ export class ArticleItemSerializer {
     return {
       id: this.article.id,
       slug:
-        this.article.slug ||
-        this.options.buildSlug(this.article.id, this.article.title),
+        this.options.buildSlug(this.article.id, this.article.title) ||
+        this.article.slug,
       title: this.article.title,
       description: this.article.description,
       body: this.article.body,
