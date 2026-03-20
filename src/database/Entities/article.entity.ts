@@ -1,4 +1,4 @@
-import {
+﻿import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
@@ -14,6 +14,10 @@ import { User } from './user.entity';
 export class Article {
   @PrimaryGeneratedColumn()
   id: number;
+
+  // Slug is generated after first insert using the article id.
+  @Column({ nullable: true })
+  slug: string;
 
   @Column()
   title: string;

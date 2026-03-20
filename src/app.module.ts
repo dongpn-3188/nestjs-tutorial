@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -14,6 +14,7 @@ import { CommonModule } from './common/common.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TagModule } from './modules/tag/tag.module';
+import { ArticleModule } from './modules/article/article.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { TagModule } from './modules/tag/tag.module';
       autoLoadEntities: true,
       migrations: [join(__dirname, 'database/migrations/*{.ts,.js}')],
       synchronize: false,
+      logging: true,
     }),
     I18nModule.forRoot({
       fallbackLanguage: 'en',
@@ -47,6 +49,7 @@ import { TagModule } from './modules/tag/tag.module';
     UsersModule,
     AuthModule,
     TagModule,
+    ArticleModule,
   ],
   controllers: [AppController],
   providers: [AppService],

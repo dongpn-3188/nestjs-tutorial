@@ -83,7 +83,9 @@ export class UsersService {
   ): Promise<void> {
     if (targetUserId === currentUserId) {
       throw new BadRequestException(
-        this.sharedService.getSharedMessage('message.CANNOT_FOLLOW_YOURSELF'),
+        this.sharedService.getSharedMessage(
+          'message.CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF',
+        ),
       );
     }
 
