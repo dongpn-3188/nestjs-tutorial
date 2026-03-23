@@ -18,7 +18,7 @@ import { User } from '../database/Entities/user.entity';
       username: process.env.DB_USERNAME || 'root',
       password: process.env.DB_PASSWORD || '',
       database: process.env.DB_NAME || 'nest_db',
-      entities: [Tag, Article, User],
+      entities: [Tag, Article, User, Comment],
       synchronize: false,
       logging: true,
     }),
