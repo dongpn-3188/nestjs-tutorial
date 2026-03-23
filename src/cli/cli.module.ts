@@ -5,6 +5,7 @@ import { InsertTagCommand } from './commands/insert-tag.command';
 import { Tag } from '../database/Entities/tag.entity';
 import { Article } from '../database/Entities/article.entity';
 import { User } from '../database/Entities/user.entity';
+import { Comment } from '../database/Entities/comment.entity';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { User } from '../database/Entities/user.entity';
       synchronize: false,
       logging: true,
     }),
-    TypeOrmModule.forFeature([Tag]),
+    TypeOrmModule.forFeature([Tag, Comment]),
   ],
   providers: [InsertTagCommand],
 })
