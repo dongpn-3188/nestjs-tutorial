@@ -19,7 +19,7 @@ describe('ArticleService', () => {
     findBySlug: jest.fn(),
     createArticle: jest.fn(),
     updateArticle: jest.fn(),
-    remove: jest.fn(),
+    softDelete: jest.fn(),
     isArticleFavoritedByUser: jest.fn(),
     favorite: jest.fn(),
     unfavorite: jest.fn(),
@@ -433,9 +433,9 @@ describe('ArticleService', () => {
         author: { id: 3 },
       };
       mockArticleRepository.findBySlug.mockResolvedValue(existing);
-      mockArticleRepository.remove.mockResolvedValue(existing);
+      mockArticleRepository.softDelete.mockResolvedValue(undefined);
       const result = await service.remove('1-article-1', 3);
-      expect(mockArticleRepository.remove).toHaveBeenCalledWith(existing);
+      expect(mockArticleRepository.softDelete).toHaveBeenCalledWith(1);
       expect(result).toEqual({ message: 'message.ARTICLE_DELETE_SUCCESS' });
     });
 
@@ -452,7 +452,7 @@ describe('ArticleService', () => {
       await expect(service.remove('1-article-1', 4)).rejects.toThrow(
         ForbiddenException,
       );
-      expect(mockArticleRepository.remove).not.toHaveBeenCalled();
+      expect(mockArticleRepository.softDelete).not.toHaveBeenCalled();
     });
 
     it('should throw InternalServerErrorException when remove operation fails', async () => {
@@ -466,7 +466,7 @@ describe('ArticleService', () => {
         author: { id: 3 },
       };
       mockArticleRepository.findBySlug.mockResolvedValue(existing);
-      mockArticleRepository.remove.mockRejectedValue(new Error('DB error'));
+      mockArticleRepository.softDelete.mockRejectedValue(new Error('DB error'));
       await expect(service.remove('1-article-1', 3)).rejects.toThrow(
         InternalServerErrorException,
       );

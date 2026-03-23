@@ -7,6 +7,8 @@ const ARTICLE_ITEM_FIELDS: Record<ArticleItemSerializerType, string[]> = {
     'title',
     'description',
     'body',
+    'createdAt',
+    'updatedAt',
     'tagList',
     'favorited',
     'favoritesCount',
@@ -35,6 +37,8 @@ export class ArticleItemSerializer {
       title: this.article.title,
       description: this.article.description,
       body: this.article.body,
+      createdAt: this.article.createdAt,
+      updatedAt: this.article.updatedAt,
       tagList: this.article.tags?.map((tag) => tag.name) || [],
       favorited:
         !!this.options.currentUserId &&
@@ -51,11 +55,10 @@ export class ArticleItemSerializer {
     };
   }
   serialize(): Record<string, any> {
-    const normalizedArticle = this.normalizedArticle;
     return this.allowedFields.reduce(
       (acc, field) => {
-        if (normalizedArticle[field] !== undefined) {
-          acc[field] = normalizedArticle[field];
+        if (this.normalizedArticle[field] !== undefined) {
+          acc[field] = this.normalizedArticle[field];
         }
         return acc;
       },
