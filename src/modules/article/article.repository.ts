@@ -131,7 +131,6 @@ export class ArticleRepository {
         },
       )
       .where('article.id = :articleId', { articleId })
-      .andWhere('article.deleted_at IS NULL')
       .getExists();
   }
 
