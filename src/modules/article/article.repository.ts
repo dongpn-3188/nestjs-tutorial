@@ -22,7 +22,6 @@ export class ArticleRepository {
       .leftJoinAndSelect('article.author', 'author')
       .leftJoinAndSelect('article.tags', 'tags')
       .leftJoinAndSelect('article.favoritedBy', 'favoritedBy')
-      .where('article.deleted_at IS NULL')
       .orderBy('article.id', 'DESC')
       .take(query.itemCount)
       .skip(query.page)
@@ -50,7 +49,6 @@ export class ArticleRepository {
       .leftJoinAndSelect('article.author', 'author')
       .leftJoinAndSelect('article.tags', 'tags')
       .leftJoinAndSelect('article.favoritedBy', 'favoritedBy')
-      .where('article.deleted_at IS NULL')
       .andWhere(
         'author.id IN (SELECT ufl.following_id FROM user_follow_links ufl WHERE ufl.follower_id = :userId)',
         { userId },
@@ -64,7 +62,7 @@ export class ArticleRepository {
 
   findBySlug(slug: string): Promise<Article | null> {
     return this.articleRepository.findOne({
-      where: { slug, deletedAt: IsNull() },
+      where: { slug },
       relations: {
         author: true,
         tags: true,

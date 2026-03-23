@@ -24,8 +24,7 @@
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/database/data-source.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/database/data-source.ts",
     "migration:show": "typeorm-ts-node-commonjs migration:show -d src/database/data-source.ts",
-    "cli": "ts-node src/cli.ts",
-    "insert:tag": "ts-node src/cli.ts insert-tag"
+    "cli": "ts-node src/cli.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
