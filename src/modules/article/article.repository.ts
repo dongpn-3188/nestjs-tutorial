@@ -1,6 +1,6 @@
 ﻿import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { Article } from '../../database/Entities/article.entity';
 import { Tag } from '../../database/Entities/tag.entity';
 import { SharedService } from '../../common/shared.service';
@@ -22,6 +22,7 @@ export class ArticleRepository {
       .leftJoinAndSelect('article.author', 'author')
       .leftJoinAndSelect('article.tags', 'tags')
       .leftJoinAndSelect('article.favoritedBy', 'favoritedBy')
+      .where('article.deleted_at IS NULL')
       .orderBy('article.id', 'DESC')
       .take(query.itemCount)
       .skip(query.page)
@@ -49,7 +50,8 @@ export class ArticleRepository {
       .leftJoinAndSelect('article.author', 'author')
       .leftJoinAndSelect('article.tags', 'tags')
       .leftJoinAndSelect('article.favoritedBy', 'favoritedBy')
-      .where(
+      .where('article.deleted_at IS NULL')
+      .andWhere(
         'author.id IN (SELECT ufl.following_id FROM user_follow_links ufl WHERE ufl.follower_id = :userId)',
         { userId },
       )
@@ -62,7 +64,7 @@ export class ArticleRepository {
 
   findBySlug(slug: string): Promise<Article | null> {
     return this.articleRepository.findOne({
-      where: { slug },
+      where: { slug, deletedAt: IsNull() },
       relations: {
         author: true,
         tags: true,
@@ -112,8 +114,8 @@ export class ArticleRepository {
     return this.articleRepository.save(article);
   }
 
-  remove(article: Article): Promise<Article> {
-    return this.articleRepository.remove(article);
+  async softDelete(articleId: number): Promise<void> {
+    await this.articleRepository.softDelete(articleId);
   }
 
   isArticleFavoritedByUser(
@@ -131,6 +133,7 @@ export class ArticleRepository {
         },
       )
       .where('article.id = :articleId', { articleId })
+      .andWhere('article.deleted_at IS NULL')
       .getExists();
   }
 

@@ -6,9 +6,14 @@
   JoinTable,
   ManyToOne,
   JoinColumn,
+  DeleteDateColumn,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Tag } from './tag.entity';
 import { User } from './user.entity';
+import { Comment } from './comment.entity';
 
 @Entity()
 export class Article {
@@ -28,6 +33,15 @@ export class Article {
   @Column({ type: 'text' })
   body: string;
 
+  @DeleteDateColumn({ name: 'deleted_at', type: 'datetime', nullable: true })
+  deletedAt: Date | null;
+
+  @CreateDateColumn({ name: 'created_at', type: 'datetime' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'datetime' })
+  updatedAt: Date;
+
   @ManyToMany(() => Tag, (tag) => tag.articles)
   @JoinTable({ name: 'article_tag_links' })
   tags: Tag[];
@@ -43,4 +57,7 @@ export class Article {
     inverseJoinColumn: { name: 'user_id', referencedColumnName: 'id' },
   })
   favoritedBy: User[];
+
+  @OneToMany(() => Comment, (comment) => comment.article)
+  comments: Comment[];
 }

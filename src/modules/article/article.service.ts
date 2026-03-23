@@ -204,7 +204,7 @@ export class ArticleService {
     const article = await this.loadArticleBySlugOrThrow(slug);
     this.validatePermission(article, requesterId);
     try {
-      await this.articleRepository.remove(article);
+      await this.articleRepository.softDelete(article.id);
       return {
         message: this.sharedService.getSharedMessage(
           'message.ARTICLE_DELETE_SUCCESS',
