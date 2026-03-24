@@ -1,4 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import {
+  ForbiddenException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CommentRepository } from './comment.repository';
 import { SharedService } from '../../common/shared.service';
@@ -152,6 +157,51 @@ describe('CommentService', () => {
       expect(mockCommentRepository.findById).toHaveBeenCalledWith(1);
       expect(mockCommentRepository.delete).toHaveBeenCalledWith(1);
       expect(result).toEqual({});
+    });
+
+    it('should throw NotFoundException when comment is not found', async () => {
+      mockCommentRepository.findById.mockResolvedValueOnce(null);
+
+      await expect(service.remove('test-article', 999, 1)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith(
+        'message.COMMENT_NOT_FOUND',
+      );
+      expect(mockCommentRepository.delete).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when comment does not belong to article', async () => {
+      mockArticleService.loadArticleBySlugOrThrow.mockResolvedValueOnce({ id: 10 });
+
+      await expect(service.remove('test-article', 1, 1)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith(
+        'message.COMMENT_NOT_BELONG_TO_ARTICLE',
+      );
+      expect(mockCommentRepository.delete).not.toHaveBeenCalled();
+    });
+
+    it('should throw ForbiddenException when requester is not comment author', async () => {
+      await expect(service.remove('test-article', 1, 999)).rejects.toThrow(
+        ForbiddenException,
+      );
+      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith(
+        'message.COMMENT_FORBIDDEN',
+      );
+      expect(mockCommentRepository.delete).not.toHaveBeenCalled();
+    });
+
+    it('should throw InternalServerErrorException when repository delete fails', async () => {
+      mockCommentRepository.delete.mockRejectedValueOnce(new Error('db error'));
+
+      await expect(service.remove('test-article', 1, 1)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+      expect(mockSharedService.getSharedMessage).toHaveBeenCalledWith(
+        'message.COMMENT_DELETE_FAILED',
+      );
     });
   });
 });
