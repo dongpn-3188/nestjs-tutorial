@@ -13,10 +13,16 @@
   "ARTICLE_UPDATE_FAILED": "Cap nhat bai viet that bai",
   "ARTICLE_DELETE_FAILED": "Xoa bai viet that bai",
   "ARTICLE_DELETE_SUCCESS": "Xoa bai viet thanh cong",
-  "ARTICLE_FAVORITE_FAILED": "Favorite bai viet that bai",
-  "ARTICLE_UNFAVORITE_FAILED": "Unfavorite bai viet that bai",
+  "ARTICLE_FAVORITE_FAILED": "Thich bai viet that bai",
+  "ARTICLE_UNFAVORITE_FAILED": "Bo thich bai viet that bai",
+  "FORBIDDEN": "Khong co quyen truy cap",
+  "COMMENT_FORBIDDEN": "Ban khong co quyen thuc hien hanh dong nay voi binh luan",
+  "COMMENT_NOT_FOUND": "Khong tim thay binh luan",
+  "COMMENT_CREATE_FAILED": "Tao binh luan that bai",
+  "COMMENT_DELETE_FAILED": "Xoa binh luan that bai",
+  "COMMENT_NOT_BELONG_TO_ARTICLE": "Binh luan khong thuoc bai viet nay",
   "TAG_SEARCH_KEYWORD_REQUIRED": "Tu khoa tim kiem la bat buoc",
-  "CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF": "Ban khong the follow hoac unfollow chinh minh",
-  "USER_FOLLOW_FAILED": "Follow user that bai",
-  "USER_UNFOLLOW_FAILED": "Unfollow user that bai"
+  "CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF": "Ban khong the theo doi hoac bo theo doi chinh minh",
+  "USER_FOLLOW_FAILED": "Theo doi user that bai",
+  "USER_UNFOLLOW_FAILED": "Bo theo doi user that bai"
 }
