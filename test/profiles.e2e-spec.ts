@@ -19,9 +19,7 @@ describe('ProfilesController', () => {
     unfollow: jest.fn().mockResolvedValue({ profile: {} }),
   };
 
-  beforeEach(async () => {
-    jest.clearAllMocks();
-
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [ProfilesController],
       providers: [
@@ -41,8 +39,12 @@ describe('ProfilesController', () => {
     await app.init();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('GET /api/profiles/:id', () => {

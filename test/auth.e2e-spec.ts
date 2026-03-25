@@ -18,9 +18,7 @@ describe('AuthController', () => {
     login: jest.fn().mockResolvedValue({ accessToken: 'token' }),
   };
 
-  beforeEach(async () => {
-    jest.clearAllMocks();
-
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [
@@ -35,8 +33,12 @@ describe('AuthController', () => {
     await app.init();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('POST /api/auth/register', () => {

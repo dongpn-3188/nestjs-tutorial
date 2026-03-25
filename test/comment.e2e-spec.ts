@@ -22,9 +22,7 @@ describe('CommentController', () => {
     remove: jest.fn().mockResolvedValue({}),
   };
 
-  beforeEach(async () => {
-    jest.clearAllMocks();
-
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [CommentController],
       providers: [
@@ -42,8 +40,12 @@ describe('CommentController', () => {
     await app.init();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('GET /api/articles/:slug/comments', () => {

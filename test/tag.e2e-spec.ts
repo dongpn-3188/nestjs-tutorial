@@ -14,9 +14,7 @@ describe('TagController', () => {
     searchByName: jest.fn().mockResolvedValue({ tags: [], page: {} }),
   };
 
-  beforeEach(async () => {
-    jest.clearAllMocks();
-
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [TagController],
       providers: [
@@ -31,8 +29,12 @@ describe('TagController', () => {
     await app.init();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('GET /api/tags', () => {
