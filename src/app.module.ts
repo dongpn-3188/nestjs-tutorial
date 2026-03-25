@@ -15,6 +15,7 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TagModule } from './modules/tag/tag.module';
 import { ArticleModule } from './modules/article/article.module';
+import { CommentModule } from './modules/comment/comment.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { ArticleModule } from './modules/article/article.module';
     AuthModule,
     TagModule,
     ArticleModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
