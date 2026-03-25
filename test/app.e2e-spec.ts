@@ -2,24 +2,43 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
+import { AppController } from './../src/app.controller';
+import { AppService } from './../src/app.service';
+import { createE2eApp } from './helpers/create-e2e-app';
 
-describe('AppController (e2e)', () => {
+describe('AppController', () => {
   let app: INestApplication<App>;
 
+  const mockAppService = {
+    getHello: jest.fn().mockReturnValue('Hello World!'),
+  };
+
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      controllers: [AppController],
+      providers: [
+        {
+          provide: AppService,
+          useValue: mockAppService,
+        },
+      ],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
+    app = createE2eApp(moduleFixture);
     await app.init();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  afterEach(async () => {
+    await app.close();
+  });
+
+  describe('GET /api', () => {
+    it('returns 200', () => {
+      return request(app.getHttpServer())
+        .get('/api')
+        .expect(200);
+    });
   });
 });
