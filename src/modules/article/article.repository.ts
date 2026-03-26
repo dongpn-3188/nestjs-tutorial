@@ -16,15 +16,15 @@ export class ArticleRepository {
     private readonly sharedService: SharedService,
   ) {}
 
-  async findAll(query: GetArticleDto): Promise<[Article[], number]> {
+  async findAll(query: GetArticleDto, take: number, skip: number): Promise<[Article[], number]> {
     const queryBuilder = this.articleRepository
       .createQueryBuilder('article')
       .leftJoinAndSelect('article.author', 'author')
       .leftJoinAndSelect('article.tags', 'tags')
       .leftJoinAndSelect('article.favoritedBy', 'favoritedBy')
       .orderBy('article.id', 'DESC')
-      .take(query.itemCount)
-      .skip(query.page)
+      .take(take)
+      .skip(skip)
       .andWhere('(:tag IS NULL OR tags.name = :tag)', {
         tag: query.tag ?? null,
       })
@@ -88,7 +88,11 @@ export class ArticleRepository {
       createdArticle.id,
       createdArticle.title,
     );
-    return this.articleRepository.save(createdArticle);
+    await this.articleRepository.save(createdArticle);
+    return this.articleRepository.findOne({
+      where: { id: createdArticle.id },
+      relations: { author: true, tags: true, favoritedBy: true },
+    }) as Promise<Article>;
   }
 
   async updateArticle(

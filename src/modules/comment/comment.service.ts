@@ -41,7 +41,7 @@ export class CommentService {
     const [comments, totalCount] = await this.commentRepository.findByArticleId(
       article.id,
       normalizedItemCount,
-      normalizedPage,
+      normalizedPage * normalizedItemCount, // convert page number to offset
     );
 
     return new CommentSerializer(

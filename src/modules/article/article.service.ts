@@ -17,6 +17,7 @@ import { UsersService } from '../users/users.service';
 import { TagService } from '../tag/tag.service';
 import { ArticleSerializer } from './serializers/article.serializer';
 import { ArticleItemSerializer } from './serializers/article-item.serializer';
+import { skip } from 'node:test';
 
 const MAX_ARTICLE_PAGE_LIMIT = 20;
 
@@ -74,11 +75,11 @@ export class ArticleService {
         query.page ?? DEFAULT_OFFSET,
         MAX_ARTICLE_PAGE_LIMIT,
       );
-    const [articles, totalCount] = await this.articleRepository.findAll({
-      ...query,
+    const [articles, totalCount] = await this.articleRepository.findAll(
+      query,
       itemCount,
-      page,
-    });
+      page * itemCount, // convert page number to offset
+    );
     return new ArticleSerializer(
       {
         articles,
@@ -110,7 +111,7 @@ export class ArticleService {
       await this.articleRepository.findFeedByUserId(
         currentUserId,
         normalizedItemCount,
-        normalizedPage,
+        normalizedPage * normalizedItemCount,
       );
     return new ArticleSerializer(
       {
