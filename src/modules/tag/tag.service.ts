@@ -26,7 +26,7 @@ export class TagService {
         offset,
         MAX_TAG_PAGE_LIMIT,
       );
-    const [tags, totalCount] = await this.tagRepository.findAll(normalizedLimit, normalizedOffset);
+    const [tags, totalCount] = await this.tagRepository.findAll(normalizedLimit, normalizedOffset * normalizedLimit); // convert page number to offset
     return new TagSerializer(
       {
         tags,
@@ -55,7 +55,7 @@ export class TagService {
     const [tags, totalCount] = await this.tagRepository.searchByName(
       normalizedKeyword,
       normalizedLimit,
-      normalizedOffset,
+      normalizedOffset * normalizedLimit, // convert page number to offset
     );
 
     return new TagSerializer(
