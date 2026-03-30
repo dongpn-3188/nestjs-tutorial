@@ -25,7 +25,7 @@
   "CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF": "You cannot follow or unfollow yourself",
   "USER_FOLLOW_FAILED": "Failed to follow user",
   "USER_UNFOLLOW_FAILED": "Failed to unfollow user",
-  "NO_FILE_UPLOADED": "No file uploaded",
+  "FILE_NOT_FOUND": "File not found",
   "INVALID_FILE_TYPE": "Invalid file type. Only jpg, jpeg, png allowed",
   "FILE_TOO_LARGE": "File too large. Max size is {{max}}MB",
   "UPLOAD_FAILED": "Failed to upload file"

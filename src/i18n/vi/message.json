@@ -25,7 +25,7 @@
   "CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF": "Ban khong the theo doi hoac bo theo doi chinh minh",
   "USER_FOLLOW_FAILED": "Theo doi user that bai",
   "USER_UNFOLLOW_FAILED": "Bo theo doi user that bai",
-  "NO_FILE_UPLOADED": "Khong co file duoc upload",
+  "FILE_NOT_FOUND": "Khong tim thay file",
   "INVALID_FILE_TYPE": "Loai file khong hop le. Chi chap nhan jpg, jpeg, png",
   "FILE_TOO_LARGE": "File qua lon. Kich thuoc toi da la {{max}}MB",
   "UPLOAD_FAILED": "Tai file that bai"
