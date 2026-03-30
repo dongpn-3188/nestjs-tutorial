@@ -9,14 +9,23 @@ import {
 } from 'nestjs-i18n';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { uploadsSubfolderOnlyMiddleware } from './common/uploads-subfolder.middleware';
 
 const API_PREFIX = 'api';
 const SWAGGER_DOCS_PATH = `${API_PREFIX}/swagger`;
 
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.setGlobalPrefix(API_PREFIX);
+  // Chặn truy cập trực tiếp uploads/, chỉ cho phép truy cập thư mục con
+  app.use('/uploads', uploadsSubfolderOnlyMiddleware);
+  app.useStaticAssets(join(__dirname, '../uploads'), {
+    prefix: '/uploads/',
+  });
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('NestJS Tutorial API')

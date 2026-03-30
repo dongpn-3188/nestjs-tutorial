@@ -16,12 +16,11 @@ import { AuthModule } from './modules/auth/auth.module';
 import { TagModule } from './modules/tag/tag.module';
 import { ArticleModule } from './modules/article/article.module';
 import { CommentModule } from './modules/comment/comment.module';
+import { UtilityModule } from './modules/utility/utility.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST,
@@ -52,6 +51,7 @@ import { CommentModule } from './modules/comment/comment.module';
     TagModule,
     ArticleModule,
     CommentModule,
+    UtilityModule,
   ],
   controllers: [AppController],
   providers: [AppService],

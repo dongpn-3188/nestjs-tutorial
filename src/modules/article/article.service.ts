@@ -17,7 +17,6 @@ import { UsersService } from '../users/users.service';
 import { TagService } from '../tag/tag.service';
 import { ArticleSerializer } from './serializers/article.serializer';
 import { ArticleItemSerializer } from './serializers/article-item.serializer';
-import { skip } from 'node:test';
 
 const MAX_ARTICLE_PAGE_LIMIT = 20;
 
