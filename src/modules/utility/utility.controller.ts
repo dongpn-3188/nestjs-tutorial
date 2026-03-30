@@ -5,6 +5,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { MAX_FILE_SIZE } from '../../common/constants';
 import type { Response } from 'express';
+import type { Multer } from 'multer';
 
 @ApiTags('files')
 @ApiBearerAuth()
@@ -43,7 +44,7 @@ export class UtilityController {
         .addFileTypeValidator({ fileType: 'jpeg|png|jpg' }) // Validates MIME type
         .build({ fileIsRequired: true }),    
       ) 
-      file: Express.Multer.File, 
+      file: Multer.File, 
       @Body('isPublic') isPublic: string,
       @Req() req, 
   ) {
