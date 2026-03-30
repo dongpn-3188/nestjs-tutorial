@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { join } from 'path';
 import { promises as fs } from 'fs';
 import * as bcrypt from 'bcryptjs';
@@ -58,10 +58,14 @@ export class UtilityService {
   async sendPrivateFile(filename: string, res: Response) {
     const filePath = join(process.cwd(), PRIVATE_FOLDER, filename);
     try {
-      await fs.access(filePath);
+      await fs.access(filePath, fs.constants.R_OK);
       return res.sendFile(filePath);
     } catch {
-      return res.status(404).send(this.sharedService.getSharedMessage('message.FILE_NOT_FOUND'));
+      throw new NotFoundException({
+        statusCode: 404,
+        errors: 'Not Found',
+        message: this.sharedService.getSharedMessage('message.FILE_NOT_FOUND'),
+      }); 
     }
   }
 }
