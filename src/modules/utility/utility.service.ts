@@ -6,7 +6,6 @@ import { UsersService } from '../users/users.service';
 import { SALT_ROUNDS, PUBLIC_FOLDER, PRIVATE_FOLDER } from '../../common/constants';
 import { SharedService } from '../../common/shared.service';
 import type { Response } from 'express';
-import type { Multer } from 'multer';
 
 @Injectable()
 export class UtilityService {
@@ -19,7 +18,7 @@ export class UtilityService {
     return (process.env.HOST || 'localhost') + ':' + (process.env.PORT || '3000');
   }
 
-  async uploadImageForUser(file: Multer.File, isPublic: boolean, user: { userId: number; email: string }) {
+  async uploadImageForUser(file: Express.Multer.File, isPublic: boolean, user: { userId: number; email: string }) {
     await this.usersService.checkUserExistOrThrow(user.userId);
 
     try {
@@ -37,7 +36,7 @@ export class UtilityService {
     }
   }
 
-  private async uploadImage(file: Multer.File, email: string, isPublic: boolean): Promise<string> {    
+  private async uploadImage(file: Express.Multer.File, email: string, isPublic: boolean): Promise<string> {    
     const targetDir = isPublic ? PUBLIC_FOLDER : PRIVATE_FOLDER;
     const ext = file.originalname.split('.').pop();
     const hash = await bcrypt.hash(email, SALT_ROUNDS);

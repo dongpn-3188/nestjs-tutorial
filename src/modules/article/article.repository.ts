@@ -1,6 +1,6 @@
 ﻿import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Article } from '../../database/Entities/article.entity';
 import { Tag } from '../../database/Entities/tag.entity';
 import { SharedService } from '../../common/shared.service';
@@ -151,5 +151,35 @@ export class ArticleRepository {
       (user) => user.id !== userId,
     );
     return this.articleRepository.save(article);
+  }
+
+  async getTopFavoritedArticles(limit: number): Promise<Article[]> {
+    const topRows = await this.articleRepository
+      .createQueryBuilder('article')
+      .leftJoin('article.favoritedBy', 'favoritedByCount')
+      .select('article.id', 'id')
+      .addSelect('COUNT(favoritedByCount.id)', 'favoritesCount')
+      .groupBy('article.id')
+      .orderBy('favoritesCount', 'DESC')
+      .getRawMany<{ id: number }>();
+
+    const topIds = topRows.map((row) => Number(row.id));
+    if (topIds.length === 0) {
+      return [];
+    }
+
+    const articles = await this.articleRepository.find({
+      where: { id: In(topIds) },
+      relations: {
+        author: true,
+        tags: true,
+        favoritedBy: true,
+      },
+    });
+
+    const orderMap = new Map(topIds.map((id, index) => [id, index]));
+    return articles.sort(
+      (a, b) => (orderMap.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (orderMap.get(b.id) ?? Number.MAX_SAFE_INTEGER),
+    ).slice(0, limit);
   }
 }

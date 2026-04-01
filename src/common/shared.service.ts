@@ -6,9 +6,9 @@ import { DEFAULT_LIMIT, DEFAULT_MAX_LIMIT, DEFAULT_OFFSET } from './constants';
 export class SharedService {
   constructor(private readonly i18n: I18nService) {}
 
-  getSharedMessage(key: string, options?: TranslateOptions): string {
+  getSharedMessage(key: string, variables?: Record<string, any>, options?: TranslateOptions): string {
     const lang = I18nContext.current()?.lang ?? 'en';
-    return this.i18n.t(key, { lang, ...options });
+    return this.i18n.t(key, { lang, ...options, args: variables });
   }
 
   buildSlug(id: number, title: string): string {

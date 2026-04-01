@@ -9,6 +9,7 @@ import {
   QueryResolver,
   HeaderResolver,
 } from 'nestjs-i18n';
+import { BullModule } from '@nestjs/bull';
 import { join } from 'path';
 import { CommonModule } from './common/common.module';
 import { UsersModule } from './modules/users/users.module';
@@ -17,6 +18,10 @@ import { TagModule } from './modules/tag/tag.module';
 import { ArticleModule } from './modules/article/article.module';
 import { CommentModule } from './modules/comment/comment.module';
 import { UtilityModule } from './modules/utility/utility.module';
+import { MailModule } from './modules/mail/mail.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksModule } from './modules/task/task.module';
+
 
 @Module({
   imports: [
@@ -45,6 +50,13 @@ import { UtilityModule } from './modules/utility/utility.module';
         new HeaderResolver(['x-lang']),
       ],
     }),
+    BullModule.forRoot({
+      redis: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379', 10),
+      },
+    }),
+    ScheduleModule.forRoot(),
     CommonModule,
     UsersModule,
     AuthModule,
@@ -52,6 +64,8 @@ import { UtilityModule } from './modules/utility/utility.module';
     ArticleModule,
     CommentModule,
     UtilityModule,
+    MailModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

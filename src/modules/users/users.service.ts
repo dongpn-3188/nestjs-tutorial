@@ -12,12 +12,14 @@ import * as bcrypt from 'bcryptjs';
 import { UserSerializer } from './serializers/user.serializer';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { SALT_ROUNDS } from '../../common/constants';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly sharedService: SharedService,
+    private readonly mailService: MailService,
   ) {}
 
   async loadUserOrThrow(id: number): Promise<User> {
@@ -94,15 +96,17 @@ export class UsersService {
 
   async follow(targetUserId: number, currentUserId: number) {
     await this.validateTargetFollowUser(targetUserId, currentUserId);
+    let isModifyDatabase = false;
 
     try {
       const hasFollowed = await this.usersRepository.isFollowingUser(
         currentUserId,
         targetUserId,
-      );
+      )
 
       if (!hasFollowed) {
         await this.usersRepository.addFollowing(currentUserId, targetUserId);
+        isModifyDatabase = true;
       }
     } catch {
       throw new InternalServerErrorException({
@@ -113,6 +117,14 @@ export class UsersService {
     }
 
     const targetUser = await this.loadUserOrThrow(targetUserId);
+    if(isModifyDatabase) {
+      await this.mailService.sendFollowUpEmail({
+        followUser: (await this.loadUserOrThrow(currentUserId)).username, 
+        targetUser: targetUser.username,
+        targetEmail: targetUser.email,
+      });
+    }
+
     return this.serializeProfile(targetUser, currentUserId);
   }
 

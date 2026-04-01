@@ -11,6 +11,7 @@ import { LoginDto } from './dto/login.dto';
 import { AuthRepository } from './auth.repository';
 import { SharedService } from '../../common/shared.service';
 import { SALT_ROUNDS } from '../../common/constants';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +19,7 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
     private readonly sharedService: SharedService,
+    private readonly mailService: MailService,
   ) {}
 
   async checkEmailExistsOrThrow(email: string): Promise<void> {
@@ -39,6 +41,8 @@ export class AuthService {
       );
       const savedUser = await this.authRepository.createUser(registerDto, hashedPassword);
       const payload = { sub: savedUser.id, email: savedUser.email };
+
+      await this.mailService.sendWelcomeEmail({ email: savedUser.email, name: savedUser.username });
 
       return {
         accessToken: await this.jwtService.signAsync(payload, { expiresIn: '1h' }),

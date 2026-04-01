@@ -1,0 +1,8 @@
+{
+  "WELCOME" : "Xin chào {username},\n\nChào mừng bạn đến với nền tảng của chúng tôi! Chúng tôi rất vui mừng khi có bạn tham gia.\n\nTrân trọng,\nĐội ngũ",
+  "WELCOME_SUBJECT": "Chào mừng đến với Nice App! Xác nhận Email của bạn",
+  "FOLLOW_UP": "Xin chào {targetUser},\n\n{followUser} đã theo dõi bạn trên Nice App!\n\nTrân trọng,\nĐội ngũ",
+  "FOLLOW_UP_SUBJECT": "{followUser} đã theo dõi bạn trên Nice App!",
+  "DAILY_REPORT_SUBJECT": "Báo cáo hàng ngày của bạn từ Nice App",
+  "DAILY_REPORT": "Xin chào Admin,\n\nĐây là báo cáo hàng ngày của bạn từ Nice App:\n\nTop 5 bài viết được yêu thích nhất:\n{reportContent}\n\nTrân trọng,\nĐội ngũ"
+}
