@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
@@ -20,6 +21,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly sharedService: SharedService,
     private readonly mailService: MailService,
+    private readonly logger: Logger,
   ) {}
 
   async checkEmailExistsOrThrow(email: string): Promise<void> {
@@ -33,20 +35,14 @@ export class AuthService {
 
   async register(registerDto: RegisterDto) {
     await this.checkEmailExistsOrThrow(registerDto.email);
+    let savedUser;
 
     try {
       const hashedPassword = await bcrypt.hash(
         registerDto.password,
         SALT_ROUNDS,
       );
-      const savedUser = await this.authRepository.createUser(registerDto, hashedPassword);
-      const payload = { sub: savedUser.id, email: savedUser.email };
-
-      await this.mailService.sendWelcomeEmail({ email: savedUser.email, name: savedUser.username });
-
-      return {
-        accessToken: await this.jwtService.signAsync(payload, { expiresIn: '1h' }),
-      };
+      savedUser = await this.authRepository.createUser(registerDto, hashedPassword);
     } catch {
       throw new InternalServerErrorException({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -54,6 +50,25 @@ export class AuthService {
         message: this.sharedService.getSharedMessage('message.REGISTRATION_FAILED'),
       });
     }
+
+    const payload = { sub: savedUser.id, email: savedUser.email };
+
+    try {
+    await this.mailService.sendWelcomeEmail({ email: savedUser.email, name: savedUser.username });
+    } catch (error) {
+      this.logger.error(
+        'Failed to send welcome email',
+        {
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          errorStack: error instanceof Error ? error.stack : undefined,
+          processName: 'welcome',
+        },
+      );
+    }
+
+    return {
+      accessToken: await this.jwtService.signAsync(payload, { expiresIn: '1h' }),
+    };
   }
 
   async login(loginDto: LoginDto) {

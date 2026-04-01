@@ -161,6 +161,7 @@ export class ArticleRepository {
       .addSelect('COUNT(favoritedByCount.id)', 'favoritesCount')
       .groupBy('article.id')
       .orderBy('favoritesCount', 'DESC')
+      .take(limit)
       .getRawMany<{ id: number }>();
 
     const topIds = topRows.map((row) => Number(row.id));
@@ -173,7 +174,6 @@ export class ArticleRepository {
       relations: {
         author: true,
         tags: true,
-        favoritedBy: true,
       },
     });
 

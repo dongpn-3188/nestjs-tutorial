@@ -11,22 +11,28 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        transport: {
-          host: configService.get<string>('MAIL_HOST'),
-          port: parseInt(configService.get<string>('MAIL_PORT') || '587', 10),
-          secure: false,
-          auth: {
-            user: configService.get<string>('MAIL_USER'),
-            pass: configService.get<string>('MAIL_PASS'),
+      useFactory: (configService: ConfigService) => {
+        const isMailDebug =
+          configService.get<string>('MAIL_DEBUG') === 'true' ||
+          configService.get<string>('NODE_ENV') !== 'production';
+
+        return {
+          transport: {
+            host: configService.get<string>('MAIL_HOST'),
+            port: parseInt(configService.get<string>('MAIL_PORT') || '587', 10),
+            secure: false,
+            auth: {
+              user: configService.get<string>('MAIL_USER'),
+              pass: configService.get<string>('MAIL_PASS'),
+            },
+            debug: isMailDebug,
+            logger: isMailDebug,
           },
-          debug: true,
-          logger: true,
-        },
-        defaults: {
-          from: `"Test Send Mail" <${configService.get<string>('MAIL_USER')}>`,
-        },
-      }),
+          defaults: {
+            from: `"Test Send Mail" <${configService.get<string>('MAIL_USER')}>`,
+          },
+        };
+      },
     }),
     BullModule.registerQueue(
       { name: 'email' },

@@ -8,9 +8,13 @@ import { INQUIRER } from '@nestjs/core';
       provide: Logger,
       scope: Scope.TRANSIENT,
       inject: [INQUIRER],
-      useFactory: (parentClass: object) => {
+      useFactory: (parentClass?: object) => {
         // Automatically sets context to the class name where injected
-        return new Logger(parentClass.constructor.name);
+        const context =
+          parentClass && (parentClass as any).constructor && (parentClass as any).constructor.name
+            ? (parentClass as any).constructor.name
+            : 'UnknownContext';
+        return new Logger(context);
       },
     },
     SharedService

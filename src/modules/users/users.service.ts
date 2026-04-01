@@ -4,6 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { User } from '../../database/Entities/user.entity';
 import { UsersRepository } from './users.repository';
@@ -20,6 +21,7 @@ export class UsersService {
     private readonly usersRepository: UsersRepository,
     private readonly sharedService: SharedService,
     private readonly mailService: MailService,
+    private readonly logger: Logger,
   ) {}
 
   async loadUserOrThrow(id: number): Promise<User> {
@@ -118,11 +120,23 @@ export class UsersService {
 
     const targetUser = await this.loadUserOrThrow(targetUserId);
     if(isModifyDatabase) {
-      await this.mailService.sendFollowUpEmail({
-        followUser: (await this.loadUserOrThrow(currentUserId)).username, 
-        targetUser: targetUser.username,
-        targetEmail: targetUser.email,
-      });
+      try {
+        const currentUser = await this.loadUserOrThrow(currentUserId);
+        await this.mailService.sendFollowUpEmail({
+          followUser: currentUser.username, 
+          targetUser: targetUser.username,
+          targetEmail: targetUser.email,
+        });
+      } catch (error) {
+        this.logger.error(
+          'Failed to send follow-up email',
+          {
+            errorMessage: error instanceof Error ? error.message : 'Unknown error',
+            errorStack: error instanceof Error ? error.stack : undefined,
+            processName: 'follow-up',
+          },
+        ); // Log the error but do not throw, since the main action (follow) is successful
+      }
     }
 
     return this.serializeProfile(targetUser, currentUserId);

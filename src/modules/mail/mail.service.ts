@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import type { Queue } from 'bull';
-import { MAX_SEND_EMAIL_RETRIES, EMAIL_RETRY_DELAY } from 'src/common/constants';
+import { MAX_SEND_EMAIL_RETRIES, EMAIL_RETRY_DELAY } from '../../common/constants';
 
 @Injectable()
 export class MailService {
