@@ -1,6 +1,6 @@
 {
   "WELCOME" : "Dear {username},\n\nWelcome to our platform! We're excited to have you on board.\n\nBest regards,\nThe Team",
-  "WELCOME_SUBJECT": "Welcome to Nice App! Confirm your Email",
+  "WELCOME_SUBJECT": "Welcome to Nice App!",
   "FOLLOW_UP": "Dear {targetUser},\n\n{followUser} has followed you on Nice App!\n\nBest regards,\nThe Team",
   "FOLLOW_UP_SUBJECT": "{followUser} has followed you on Nice App!",
   "DAILY_REPORT_SUBJECT": "Your Daily Report from Nice App",
