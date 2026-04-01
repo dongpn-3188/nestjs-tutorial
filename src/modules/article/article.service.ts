@@ -278,4 +278,14 @@ export class ArticleService {
       });
     }
   }
+
+  async getTopFavoritedArticles(limit: number){
+    const articles = await this.articleRepository.getTopFavoritedArticles(limit);
+    return articles.map((article) =>
+      new ArticleItemSerializer(article, {
+        type: 'DETAIL',
+        buildSlug: this.sharedService.buildSlug.bind(this.sharedService),
+      }).serialize(),
+    );
+  }      
 }

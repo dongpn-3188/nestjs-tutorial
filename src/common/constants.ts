@@ -5,3 +5,5 @@ export const SALT_ROUNDS = 10;
 export const MAX_FILE_SIZE = 10; // in MB
 export const PUBLIC_FOLDER = 'uploads';
 export const PRIVATE_FOLDER = 'private';
+export const MAX_SEND_EMAIL_RETRIES = 3;
+export const EMAIL_RETRY_DELAY = 5000; // in milliseconds
